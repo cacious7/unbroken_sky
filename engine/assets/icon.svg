@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- The Unbroken Sky app icon: a fish eagle rising over water at dawn. Original. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1f3554"/>
+      <stop offset="0.55" stop-color="#b8692e"/>
+      <stop offset="1" stop-color="#e8b060"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#sky)"/>
+  <circle cx="256" cy="330" r="92" fill="#f4d48a" opacity="0.9"/>
+  <rect x="0" y="360" width="512" height="152" fill="#1d2a33"/>
+  <path d="M40 400 Q140 386 240 400 M280 430 Q380 416 470 430 M90 460 Q200 448 300 462" stroke="#5a8aa8" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <!-- eagle, wings raised, seen from the front -->
+  <path d="M256 250 Q190 140 60 120 Q120 170 130 210 Q90 200 60 210 Q150 240 220 280 Z" fill="#1e1712"/>
+  <path d="M256 250 Q322 140 452 120 Q392 170 382 210 Q422 200 452 210 Q362 240 292 280 Z" fill="#1e1712"/>
+  <ellipse cx="256" cy="282" rx="34" ry="56" fill="#7a3b1e"/>
+  <path d="M222 262 Q256 300 290 262 Q290 222 256 214 Q222 222 222 262 Z" fill="#f4f1ea"/>
+  <circle cx="256" cy="206" r="26" fill="#f7f4ee"/>
+  <path d="M246 214 L256 236 L266 214 Z" fill="#e3b33a"/>
+  <circle cx="246" cy="200" r="4" fill="#2a2016"/><circle cx="266" cy="200" r="4" fill="#2a2016"/>
+  <path d="M236 334 L222 350 M276 334 L290 350" stroke="#e3b33a" stroke-width="8" stroke-linecap="round"/>
+</svg>

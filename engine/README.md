@@ -75,3 +75,12 @@ Controls (all work together; any direct movement cancels a tap-walk):
 - Verified: 117 headless checks pass, including a full-chapter run that plays every scene in order on one save and confirms the C1 choice, water compact, key and eagle are remembered at the end. All scenes start in a window without errors.
 - Art and sound sample (owner asked for real art instead of shapes): original SVG sprites for Tavo, a husk and the eagle (fish-eagle colouring) and five synthesised sound effects in `assets/`, recorded in `assets/ASSET_REGISTER.md`. `tests/showcase.tscn` renders greybox vs. sample. Not yet wired into the game, pending the owner's choice of art direction.
 - Not included yet: SC01 prologue (under 40 seconds, no play; optional per M1).
+
+### 27 October 2026: session 1, continued (first art and sound pass)
+
+- Art direction chosen: flat vector (SVG). The whole cast is generated from one template (`tools/generate_characters.gd`); 31 hand-drawn props in `assets/art/props/`; sprites are assigned by node name in `data/art_catalog.json` (`ArtCatalog`), so scenes don't need editing to add or swap art. Tavo faces his walking direction and bobs as he walks; husk tells (windup glow, red strike, ringed connector) are drawn on its sprite; the eagle banks to its heading with wingbeats and a shadow.
+- Scenes are depth-sorted by y, so characters pass in front of and behind props. Ground surfaces get subtle texture (pebbles, dry grass; ripples on water) via `ground_detail.gd`; walls draw as mud-brick; perches look like stone ledges.
+- Sound: `Sfx` autoload plays the synthesised effects (hammer by result, husk windup, water sweep, pump squeak, the whispered "Present" via a dialogue line's `"sfx"` field). Pause menu has Sound On/Off.
+- App icon: `assets/icon.svg`.
+- Verified: 119 headless checks pass (adds art catalog and sound-name checks). Visual review of all nine scenes via `tests/tour.tscn`.
+- Next: phone check of the art at real size; SC01 prologue; title screen art; portraits for dialogue.

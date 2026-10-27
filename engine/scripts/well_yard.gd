@@ -51,6 +51,7 @@ func _on_used(target: Interactable) -> void:
 
 
 func _use_pump() -> void:
+	Sfx.play("pump_squeak", 0.0, 0.9 + 0.1 * GameState.get_flag("sc02_pump_count"))
 	if not GameState.get_flag("sc02_pump_repaired"):
 		if GameState.get_flag("sc02_pin_collected"):
 			GameState.set_flag("sc02_pump_repaired", true)

@@ -34,7 +34,7 @@
     "key": [
       {"id": "sc07_key_01", "speaker": "", "text": "Sena's key fits. The sluice lock turns."},
       {"id": "sc07_key_02", "speaker": "", "text": "Behind the sluice grille, a sleeping man whispers in Tavo's own voice."},
-      {"id": "sc07_key_03", "speaker": "SLEEPING MAN", "caption": "[a whisper in Tavo's voice]", "text": "Present."},
+      {"id": "sc07_key_03", "sfx": "whisper_present", "speaker": "SLEEPING MAN", "caption": "[a whisper in Tavo's voice]", "text": "Present."},
       {"id": "sc07_key_04", "speaker": "", "text": "Tavo freezes."},
       {"id": "sc07_key_05", "speaker": "NALI", "text": "He's alive. Don't pull him out until I see the chain."}
     ],

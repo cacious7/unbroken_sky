@@ -1,6 +1,7 @@
 @tool
 extends StaticBody2D
-## Solid placeholder scenery such as walls and buildings.
+## Solid scenery such as walls and buildings. Draws mud-brick until given a sprite
+## (see ArtCatalog), in which case the sprite is drawn over the same collision box.
 
 @export var size := Vector2(64, 64):
 	set(value):
@@ -15,6 +16,11 @@ extends StaticBody2D
 		label = value
 		queue_redraw()
 
+var texture: Texture2D = null
+var art_height := 0.0
+var art_feet := false
+var show_label := true
+
 
 func _ready() -> void:
 	if Engine.is_editor_hint():
@@ -26,5 +32,19 @@ func _ready() -> void:
 	add_child(shape)
 
 
+func set_art(art_texture: Texture2D, height: float, feet: bool, labelled: bool) -> void:
+	texture = art_texture
+	art_height = height
+	art_feet = feet
+	show_label = labelled
+	queue_redraw()
+
+
 func _draw() -> void:
-	Placeholder.draw_box(self, size, color, label)
+	if texture != null:
+		Placeholder.draw_art(self, texture, Placeholder.art_rect(texture, size, art_height, art_feet),
+				label if show_label else "")
+	elif label != "":
+		Placeholder.draw_box(self, size, color, label)
+	else:
+		Placeholder.draw_bricks(self, size, color)

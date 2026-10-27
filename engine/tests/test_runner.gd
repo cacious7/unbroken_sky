@@ -33,6 +33,7 @@ func _ready() -> void:
 	GameState.scene_changes_enabled = false
 	Settings.path = "user://test_settings.json"
 	_test_dialogue_files()
+	_test_art_catalog()
 	_test_save_recovery()
 	_test_settings()
 	await _test_sc02_sequence()
@@ -81,6 +82,8 @@ func _test_dialogue_files() -> void:
 				if line_id == "" or ids.has(line_id) or str(line.get("text", "")) == "":
 					problems.append("bad id/text: %s" % line_id)
 				ids[line_id] = true
+				if line.has("sfx") and not Sfx.SOUNDS.has(line.sfx):
+					problems.append("%s: unknown sound %s" % [line_id, line.sfx])
 				for key: String in line.get("if", {}):
 					if not GameState.DEFAULTS.has(key):
 						problems.append("%s: unknown condition %s" % [line_id, key])
@@ -100,6 +103,26 @@ func _test_dialogue_files() -> void:
 			if not conversations.has(found.get_string(1)):
 				missing.append(found.get_string(1))
 		_check(missing.is_empty(), "every conversation used by %s exists %s" % [script_path, missing])
+
+
+func _test_art_catalog() -> void:
+	var missing: Array[String] = []
+	for object_name: String in ArtCatalog.entries():
+		var path: String = ArtCatalog.ART_ROOT + str(ArtCatalog.entries()[object_name].texture)
+		if not ResourceLoader.exists(path):
+			missing.append(path)
+	_check(not ArtCatalog.entries().is_empty() and missing.is_empty(),
+			"art catalog loads and every sprite it names exists %s" % [missing])
+	var unused: Array[String] = []
+	var names := {}
+	for scene_path: String in GameState.SCENES.values():
+		var state := (load(scene_path) as PackedScene).get_state()
+		for i in state.get_node_count():
+			names[str(state.get_node_name(i))] = true
+	for object_name: String in ArtCatalog.entries():
+		if not names.has(object_name):
+			unused.append(object_name)
+	_check(unused.is_empty(), "every art catalog entry matches an object in some scene %s" % [unused])
 
 
 func _write_save(text: String) -> void:

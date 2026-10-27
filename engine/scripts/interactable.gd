@@ -27,6 +27,11 @@ signal used(target: Interactable)
 const TAP_PADDING := 16.0
 
 var enabled := true
+## Sprite art, assigned by ArtCatalog; without it a labelled box is drawn.
+var texture: Texture2D = null
+var art_height := 0.0
+var art_feet := false
+var show_label := true
 var _body: StaticBody2D
 
 
@@ -51,14 +56,31 @@ func _ready() -> void:
 	body_exited.connect(_on_body_exited)
 
 
+func set_art(art_texture: Texture2D, height: float, feet: bool, labelled: bool) -> void:
+	texture = art_texture
+	art_height = height
+	art_feet = feet
+	show_label = labelled
+	queue_redraw()
+
+
 func _draw() -> void:
-	Placeholder.draw_box(self, body_size, color, label)
+	if texture != null:
+		Placeholder.draw_art(self, texture, Placeholder.art_rect(texture, body_size, art_height, art_feet),
+				label if show_label else "")
+	else:
+		Placeholder.draw_box(self, body_size, color, label)
 
 
 ## True if a tap or click at this world position should select this object.
+## Covers the padded body and, when there is art, the whole sprite.
 func hit_test(world_point: Vector2) -> bool:
-	var padded := body_size + Vector2.ONE * TAP_PADDING * 2.0
-	return enabled and Rect2(global_position - padded / 2.0, padded).has_point(world_point)
+	if not enabled:
+		return false
+	var area := Rect2(-body_size / 2.0, body_size).grow(TAP_PADDING)
+	if texture != null:
+		area = area.merge(Placeholder.art_rect(texture, body_size, art_height, art_feet))
+	return area.has_point(world_point - global_position)
 
 
 ## Shows or hides the object, including its collision, e.g. a character arriving.

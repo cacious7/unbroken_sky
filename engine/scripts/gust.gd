@@ -20,6 +20,10 @@ extends Node2D
 @export var label := ""
 
 
+func _ready() -> void:
+	z_index = -4
+
+
 func contains(world_point: Vector2) -> bool:
 	return Rect2(global_position - size / 2.0, size).has_point(world_point)
 

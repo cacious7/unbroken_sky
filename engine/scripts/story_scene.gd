@@ -15,6 +15,7 @@ var _busy := false
 
 
 func _ready() -> void:
+	_dress_scene()
 	dialogue.load_file(_dialogue_file())
 	for child in get_children():
 		if child is Interactable:
@@ -22,6 +23,7 @@ func _ready() -> void:
 	player.focus_changed.connect(hud.show_prompt)
 	player.focus_changed.connect(_update_action_label.unbind(1))
 	player.health_changed.connect(hud.set_health)
+	player.struck.connect(_play_strike_sound)
 	hud.set_health(player.health, Player.MAX_HEALTH)
 	hud.show_key_hints = not touch.device_has_touch
 	hud.restart_requested.connect(_restart)
@@ -34,6 +36,20 @@ func _ready() -> void:
 	add_child(pause_menu)
 	_refresh_objective()
 	_start()
+
+
+## Art and depth: flat colour areas go to the back, objects and characters are drawn
+## in order of their y position (so Tavo can walk in front of or behind things), the
+## ground gets texture, and objects listed in the art catalog get their sprites.
+func _dress_scene() -> void:
+	y_sort_enabled = true
+	var detail_script := preload("res://scripts/ground_detail.gd")
+	for child in get_children():
+		if child is ColorRect:
+			# The base ground under every other surface (roads, floors, platforms).
+			child.z_index = -11 if child.name == "Ground" else -10
+			detail_script.attach(child, hash(name + child.name))
+	ArtCatalog.apply(self)
 
 
 ## Called when the player uses an object. Ignored while a conversation is running.
@@ -82,6 +98,18 @@ func set_combat(on: bool) -> void:
 	touch.set_combat_mode(on)
 	hud.set_combat_visible(on)
 	_update_action_label()
+
+
+## The hammer sounds different depending on what it hits: a light ring off a shell,
+## a solid clang on a connector, a deep one when something breaks.
+func _play_strike_sound(result: String) -> void:
+	match result:
+		"deflect":
+			Sfx.play("hammer_clang", -8.0, 1.35)
+		"interrupt", "hit":
+			Sfx.play("hammer_clang")
+		"break":
+			Sfx.play("hammer_clang", 2.0, 0.75)
 
 
 func _update_action_label() -> void:

@@ -3,6 +3,8 @@ extends Node2D
 ## Tavo's eagle form for constrained perch-to-perch flight. Flies at a steady speed,
 ## turns towards the steering direction, and has limited airtime per link.
 
+const ART := preload("res://assets/art/eagle.svg")
+const ART_SIZE := Vector2(96, 72)
 const SPEED := 190.0
 ## Radians per second.
 const TURN_RATE := 3.2
@@ -11,6 +13,11 @@ var heading := Vector2.RIGHT
 var airtime := 0.0
 var max_airtime := 1.0
 var flying := false
+var _flap := 0.0
+
+
+func _ready() -> void:
+	z_index = 5
 
 
 func perch_at(world_position: Vector2, facing: Vector2) -> void:
@@ -35,19 +42,19 @@ func fly(delta: float, steer: Vector2, push: Vector2) -> void:
 		heading = heading.rotated(turn)
 	global_position += (heading * SPEED + push) * delta
 	airtime = maxf(airtime - delta, 0.0)
+	_flap += delta * 7.0
 	queue_redraw()
 
 
 func _draw() -> void:
-	var forward := heading
-	var side := heading.orthogonal()
-	var body := PackedVector2Array([forward * 24.0, -forward * 15.0 + side * 9.0, -forward * 15.0 - side * 9.0])
-	var wings := PackedVector2Array([forward * 4.0, -forward * 9.0 + side * 34.0, -forward * 6.0,
-			-forward * 9.0 - side * 34.0])
-	draw_colored_polygon(wings, Color(0.3, 0.2, 0.14))
-	draw_colored_polygon(body, Color(0.85, 0.6, 0.3))
-	draw_string(ThemeDB.fallback_font, Vector2(-40, -40), "EAGLE", HORIZONTAL_ALIGNMENT_CENTER,
-			80, 13, Color(0.95, 0.92, 0.85))
+	# Shadow on the water below, then the bird turned to its heading. Wingbeats while
+	# flying are a gentle squash across the wings.
+	draw_set_transform(Vector2(6, 10), heading.angle(), Vector2(0.9, 0.5))
+	draw_texture_rect(ART, Rect2(-ART_SIZE / 2.0, ART_SIZE), false, Color(0, 0, 0, 0.3))
+	var flap := 1.0 - 0.18 * absf(sin(_flap)) if flying else 0.8
+	draw_set_transform(Vector2.ZERO, heading.angle(), Vector2(1.0, flap))
+	draw_texture_rect(ART, Rect2(-ART_SIZE / 2.0, ART_SIZE), false)
+	draw_set_transform(Vector2.ZERO)
 	if flying:
 		# Airtime bar: how long until the wings give out.
 		var fraction := airtime / max_airtime if max_airtime > 0.0 else 0.0

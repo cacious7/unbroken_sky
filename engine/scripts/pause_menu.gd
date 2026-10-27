@@ -11,6 +11,7 @@ var _menu: PanelContainer
 var _size_button: Button
 var _speed_button: Button
 var _assist_button: Button
+var _sound_button: Button
 
 
 func _ready() -> void:
@@ -62,6 +63,7 @@ func _refresh() -> void:
 	_size_button.text = "Text size: %s" % Settings.text_size_name()
 	_speed_button.text = "Text speed: %s" % Settings.text_speed_name()
 	_assist_button.text = "Flight assist: %s" % ("On" if Settings.flight_assist else "Off")
+	_sound_button.text = "Sound: %s" % ("On" if Settings.sound_on else "Off")
 	for button in _menu.find_children("", "Button", true, false):
 		button.add_theme_font_size_override("font_size", Settings.font_size(20))
 
@@ -116,6 +118,8 @@ func _build() -> void:
 	column.add_child(_speed_button)
 	_assist_button = _button("", Settings.toggle_flight_assist)
 	column.add_child(_assist_button)
+	_sound_button = _button("", Settings.toggle_sound)
+	column.add_child(_sound_button)
 	column.add_child(_button("Title screen", _to_title))
 
 

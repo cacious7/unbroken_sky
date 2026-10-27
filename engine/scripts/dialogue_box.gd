@@ -105,6 +105,8 @@ func _show_line(line: Dictionary) -> void:
 			Color(0.95, 0.92, 0.85) if speaker != "" else Color(0.75, 0.82, 0.9))
 	_revealed = 0.0
 	_text.visible_characters = 0 if Settings.chars_per_second() > 0.0 else -1
+	if line.has("sfx"):
+		Sfx.play(str(line.sfx))
 
 	for old in _choices.get_children():
 		_choices.remove_child(old)

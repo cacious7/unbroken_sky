@@ -15,6 +15,8 @@ signal struck(result: String)
 
 const SPEED := 150.0
 const SIZE := Vector2(20, 28)
+const ART := preload("res://assets/art/characters/tavo.svg")
+const ART_HEIGHT := 48.0
 const ARRIVE_DISTANCE := 4.0
 ## A tap-walk gives up after this long without real progress (e.g. blocked by a wall).
 const STUCK_SECONDS := 0.35
@@ -50,6 +52,7 @@ var _dash_speed := 0.0
 var _grace_left := 0.0
 var _cooldown_left := 0.0
 var _swing_left := 0.0
+var _walk_cycle := 0.0
 
 
 func _ready() -> void:
@@ -81,7 +84,13 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	if _walking:
 		_check_stuck(before, delta)
-	if _walking or _grace_left > 0.0 or _swing_left > 0.0:
+	var moved := global_position.distance_to(before) > 0.1
+	if moved:
+		_walk_cycle += delta * 12.0
+	elif _walk_cycle != 0.0:
+		_walk_cycle = 0.0
+		queue_redraw()
+	if moved or _walking or _grace_left > 0.0 or _swing_left > 0.0:
 		queue_redraw()
 	_update_focus()
 	if _walking and _walk_target != null and _nearby.has(_walk_target):
@@ -93,7 +102,13 @@ func _physics_process(delta: float) -> void:
 func _draw() -> void:
 	# Flicker while protected after a hit or during a dodge.
 	var flicker := _grace_left > 0.0 and int(_grace_left * 20.0) % 2 == 0
-	Placeholder.draw_box(self, SIZE, Color(0.25, 0.35, 0.6, 0.4 if flicker else 1.0), "TAVO")
+	var rect := Placeholder.art_rect(ART, SIZE, ART_HEIGHT, true)
+	# A small bob while walking.
+	rect.position.y -= absf(sin(_walk_cycle)) * 2.0
+	# Face the way he last moved.
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1.0 if facing.x < -0.1 else 1.0, 1.0))
+	draw_texture_rect(ART, rect, false, Color(1, 1, 1, 0.4 if flicker else 1.0))
+	draw_set_transform(Vector2.ZERO)
 	if _swing_left > 0.0:
 		draw_arc(Vector2.ZERO, ATTACK_RANGE, facing.angle() - 0.8, facing.angle() + 0.8, 12,
 				Color(1, 1, 1, 0.9), 4.0)

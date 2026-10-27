@@ -14,6 +14,7 @@ var text_size := 0
 var text_speed := 0
 ## Wider landing zones, longer airtime and weaker gusts for eagle flight.
 var flight_assist := false
+var sound_on := true
 
 
 func _ready() -> void:
@@ -51,6 +52,16 @@ func toggle_flight_assist() -> void:
 	_save_and_notify()
 
 
+func toggle_sound() -> void:
+	sound_on = not sound_on
+	_apply_sound()
+	_save_and_notify()
+
+
+func _apply_sound() -> void:
+	AudioServer.set_bus_mute(0, not sound_on)
+
+
 func load_settings() -> void:
 	if not FileAccess.file_exists(path):
 		return
@@ -60,6 +71,8 @@ func load_settings() -> void:
 	text_size = _index_or_default(data.get("text_size"), TEXT_SIZES.size())
 	text_speed = _index_or_default(data.get("text_speed"), TEXT_SPEEDS.size())
 	flight_assist = data.get("flight_assist") == true
+	sound_on = data.get("sound_on") != false
+	_apply_sound()
 
 
 func _index_or_default(value: Variant, count: int) -> int:
@@ -72,5 +85,6 @@ func _save_and_notify() -> void:
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file != null:
 		file.store_string(JSON.stringify({
-			"text_size": text_size, "text_speed": text_speed, "flight_assist": flight_assist}))
+			"text_size": text_size, "text_speed": text_speed, "flight_assist": flight_assist,
+			"sound_on": sound_on}))
 	changed.emit()

@@ -104,7 +104,7 @@ label = "NALI"
 prompt = "Talk to the healer"
 
 [node name="Exit" type="Area2D" parent="."]
-position = Vector2(930, 295)
+position = Vector2(905, 295)
 script = ExtResource("3_inter")
 body_size = Vector2(28, 120)
 color = Color(0.45, 0.6, 0.4, 1)

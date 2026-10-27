@@ -14,6 +14,7 @@ var rising := false
 
 
 func _ready() -> void:
+	z_index = 5
 	level = start_level
 
 

@@ -29,7 +29,7 @@
       {"id": "sc02_pump_silt_01", "speaker": "", "system": true, "text": "The second pull brings up black silt."}
     ],
     "whisper": [
-      {"id": "sc02_whisper_01", "speaker": "WHISPER", "caption": "[a whisper rises from the well]", "text": "Present."},
+      {"id": "sc02_whisper_01", "sfx": "whisper_present", "speaker": "WHISPER", "caption": "[a whisper rises from the well]", "text": "Present."},
       {"id": "sc02_whisper_02", "speaker": "TAVO", "text": "Did you hear that?"},
       {"id": "sc02_whisper_03", "speaker": "SENA", "text": "I heard our breakfast becoming a long walk."}
     ],

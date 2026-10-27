@@ -80,6 +80,7 @@ func _enter(new_state: State) -> void:
 			_left = TELEGRAPH_SECONDS
 		State.SWEEP:
 			_left = SWEEP_SECONDS
+			Sfx.play("water_sweep")
 		State.EXPOSED:
 			_left = EXPOSED_SECONDS
 		_:

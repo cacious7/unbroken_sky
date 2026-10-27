@@ -12,7 +12,10 @@ signal broken(husk: Husk)
 enum State { DORMANT, APPROACH, WINDUP, STRIKE, RECOVERY, BROKEN }
 
 const RADIUS := 16.0
-const SIZE := Vector2(28, 36)
+const ART := preload("res://assets/art/husk.svg")
+const ART_HEIGHT := 58.0
+## Where the copper connector sits in the sprite, as a fraction of its size.
+const CONNECTOR := Vector2(0.5, 50.0 / 96.0)
 const SPEED := 60.0
 const ATTACK_DISTANCE := 64.0
 const WINDUP_SECONDS := 0.85
@@ -134,6 +137,7 @@ func _enter(new_state: State) -> void:
 	match new_state:
 		State.WINDUP:
 			_left = WINDUP_SECONDS
+			Sfx.play("husk_windup")
 		State.STRIKE:
 			_left = STRIKE_SECONDS
 		State.RECOVERY:
@@ -146,24 +150,33 @@ func _enter(new_state: State) -> void:
 
 
 func _draw() -> void:
+	var rect := Placeholder.art_rect(ART, Vector2(RADIUS, RADIUS) * 2.0, ART_HEIGHT, true)
 	if state == State.BROKEN:
-		draw_rect(Rect2(-SIZE.x / 2.0 - 4, 4, SIZE.x + 8, 10), Color(0.3, 0.3, 0.32))
+		# Collapsed: the shell slumped flat and dark.
+		var slumped := Rect2(rect.position.x - 6, rect.end.y - rect.size.y * 0.35,
+				rect.size.x + 12, rect.size.y * 0.35)
+		draw_texture_rect(ART, slumped, false, Color(0.45, 0.42, 0.4))
 		return
-	var body := Color(0.45, 0.47, 0.5)
-	if state == State.STRIKE:
-		body = Color(0.75, 0.35, 0.25)
-	Placeholder.draw_box(self, SIZE, body, "HUSK")
-	var rect := Rect2(-SIZE / 2.0, SIZE)
+	var tint := Color.WHITE
 	if state == State.WINDUP:
 		# Glow grows through the windup: the main visual tell.
 		var progress := 1.0 - _left / WINDUP_SECONDS
-		draw_rect(rect.grow(3.0 + 5.0 * progress), Color(1.0, 0.6, 0.1, 0.45 + 0.55 * progress),
-				false, 2.0 + 3.0 * progress)
-		draw_string(ThemeDB.fallback_font, Vector2(-20, -SIZE.y / 2.0 - 22), "!",
-				HORIZONTAL_ALIGNMENT_CENTER, 40, 26, Color(1.0, 0.55, 0.1))
+		draw_circle(rect.get_center(), rect.size.y * (0.45 + 0.15 * progress),
+				Color(1.0, 0.6, 0.1, 0.25 + 0.45 * progress))
+		tint = Color(1.0, 0.85 - 0.25 * progress, 0.6 - 0.3 * progress)
+	elif state == State.STRIKE:
+		tint = Color(1.0, 0.55, 0.45)
+	draw_texture_rect(ART, rect, false, tint)
+	if state == State.WINDUP:
+		var mark := Vector2(-20, rect.position.y - 4)
+		draw_string_outline(ThemeDB.fallback_font, mark, "!", HORIZONTAL_ALIGNMENT_CENTER, 40, 28, 5,
+				Placeholder.LABEL_OUTLINE)
+		draw_string(ThemeDB.fallback_font, mark, "!", HORIZONTAL_ALIGNMENT_CENTER, 40, 28, Color(1.0, 0.55, 0.1))
 	if state == State.RECOVERY:
-		draw_circle(Vector2(0, -4), 8.0, Color(0.9, 0.55, 0.2))
-		draw_arc(Vector2(0, -4), 11.0, 0.0, TAU, 20, Color(1, 1, 1, 0.9), 2.0)
+		# Ring the exposed connector (its position in the sprite).
+		var connector := rect.position + rect.size * CONNECTOR
+		draw_arc(connector, 9.0, 0.0, TAU, 20, Color(1, 1, 1, 0.95), 2.5)
+		draw_arc(connector, 12.0, 0.0, TAU, 20, Color(1.0, 0.75, 0.3, 0.7), 2.0)
 	for i in max_health:
-		var pip := Rect2(-12 + i * 9, SIZE.y / 2.0 + 4, 7, 4)
+		var pip := Rect2(-12 + i * 9, RADIUS + 4, 7, 4)
 		draw_rect(pip, Color(0.9, 0.55, 0.2) if i < health else Color(0.2, 0.2, 0.2, 0.5))
