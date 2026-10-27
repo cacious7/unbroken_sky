@@ -1,0 +1,48 @@
+{
+  "scene_id": "SC04",
+  "source": "Game Concept/narrative/FINAL_SCRIPT.md, SC04. Lines marked \"system\": true are gameplay feedback, hints or placeholder prompts that are not in the script; review them before release.",
+  "conversations": {
+    "arrive": [
+      {"id": "sc04_arrive_01", "speaker": "", "text": "At home, Mera packs Tavo's bag with exact, practised movements. Sena is making a key from a charcoal rubbing of the fortress mechanism."},
+      {"id": "sc04_arrive_02", "speaker": "MERA", "text": "Do not answer a voice from water. Do not promise anything in a sealed room."},
+      {"id": "sc04_arrive_03", "speaker": "TAVO", "text": "Are these travel instructions or a confession?"},
+      {"id": "sc04_arrive_04", "speaker": "MERA", "text": "They're instructions."},
+      {"id": "sc04_arrive_05", "speaker": "TAVO", "text": "What was the mark on that seal?"},
+      {"id": "sc04_arrive_06", "speaker": "MERA", "text": "A department that should have died with the capital."},
+      {"id": "sc04_arrive_07", "speaker": "", "text": "Tavo notices a small copper register plate in her bag. Mera closes it."},
+      {"id": "sc04_arrive_08", "speaker": "MERA", "text": "Ask Eren where his duplicate records went. Bring back his answer. Don't trust only what he says."},
+      {"id": "sc04_arrive_09", "speaker": "SENA", "text": "And bring the wheel. Answers don't fit pumps."}
+    ],
+    "gift": [
+      {"id": "sc04_gift_01", "speaker": "", "text": "Sena gives Tavo the key and the copper bird. Tavo protests."},
+      {"id": "sc04_gift_02", "speaker": "SENA", "text": "It's not a gift. Test the balance somewhere with wind."}
+    ],
+    "seven": [
+      {"id": "sc04_seven_01", "speaker": "MERA", "text": "When you were seven, I brought you home sick. There are things about that sickness I haven't told you."},
+      {"id": "sc04_seven_02", "speaker": "TAVO", "text": "Then tell me now."},
+      {"id": "sc04_seven_03", "speaker": "MERA", "text": "I need to get something out of hiding first. When you return, you will have it. All of it."},
+      {"id": "sc04_seven_04", "speaker": "", "text": "He leaves angry rather than soothed."}
+    ],
+    "gate": [
+      {"id": "sc04_gate_01", "speaker": "", "text": "Daru meets him at the gate."},
+      {"id": "sc04_gate_02", "speaker": "DARU", "text": "If you're late, I'll come fetch you."},
+      {"id": "sc04_gate_03", "speaker": "TAVO", "text": "With the army?"},
+      {"id": "sc04_gate_04", "speaker": "DARU", "text": "With a rope. The army complains too much."}
+    ],
+    "mera_waiting": [
+      {"id": "sc04_mera_waiting_01", "speaker": "", "system": true, "text": "Mera is checking the bag a second time. Sena is waiting with the key."}
+    ],
+    "mera_after": [
+      {"id": "sc04_mera_after_01", "speaker": "", "system": true, "text": "Mera keeps packing and does not look up."}
+    ],
+    "sena_after": [
+      {"id": "sc04_sena_after_01", "speaker": "SENA", "system": true, "text": "Bring the bird back in one piece. The wheel too."}
+    ],
+    "inspect_bag": [
+      {"id": "sc04_inspect_bag_01", "speaker": "", "system": true, "text": "Water skin, bread, a coil of cord. Everything folded twice."}
+    ],
+    "door_locked": [
+      {"id": "sc04_door_locked_01", "speaker": "", "system": true, "text": "Not without the key Sena is making."}
+    ]
+  }
+}

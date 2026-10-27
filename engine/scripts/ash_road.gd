@@ -1,0 +1,153 @@
+extends StoryScene
+## SC05 "The Ash Road": the husk tutorial. One husk on first contact; the second enters
+## only after the first is broken. Defeat restarts the encounter at its entrance with
+## full health and no other penalty. Afterwards: the merchant, the way station and Nali.
+
+## Walking past this x position wakes the first husk.
+const AMBUSH_X := 300.0
+## Where Tavo restarts after defeat: the encounter entrance.
+const ENTRANCE := Vector2(250, 290)
+
+const RESULT_CAPTIONS := {
+	"deflect": "[the hammer glances off the shell]",
+	"interrupt": "[strike interrupted: connector exposed]",
+	"hit": "[the copper connector cracks]",
+	"break": "[the husk collapses]",
+}
+
+@onready var husk_one: Husk = $HuskOne
+@onready var husk_two: Husk = $HuskTwo
+@onready var merchant: Interactable = $Merchant
+@onready var nali: Interactable = $Nali
+
+var _fighting := false
+
+
+func _dialogue_file() -> String:
+	return "res://data/dialogue/sc05.json"
+
+
+func _start() -> void:
+	for husk: Husk in [husk_one, husk_two]:
+		husk.state_changed.connect(_on_husk_state)
+		husk.broken.connect(_on_husk_broken)
+	player.defeated.connect(_on_defeated)
+	player.struck.connect(_on_struck)
+	if GameState.get_flag("sc05_husk_one_down"):
+		husk_one.set_broken()
+	if GameState.get_flag("sc05_fight_done"):
+		husk_two.set_broken()
+	if not GameState.get_flag("sc05_husk_one_down"):
+		# The second husk has not entered yet: hidden and not solid.
+		husk_two.visible = false
+		husk_two.collision_layer = 0
+	_refresh_people()
+
+	if not GameState.get_flag("sc05_arrived"):
+		await _say("arrive")
+		GameState.set_flag("sc05_arrived", true)
+		_refresh_objective()
+	elif GameState.get_flag("sc05_husk_one_down") and not GameState.get_flag("sc05_fight_done"):
+		player.global_position = ENTRANCE
+		_begin_second()
+	elif GameState.get_flag("sc05_fight_done") and not GameState.get_flag("sc05_merchant_done"):
+		await _after_fight()
+
+
+func _physics_process(_delta: float) -> void:
+	if not _fighting and not _busy and player.active \
+			and GameState.get_flag("sc05_arrived") and not GameState.get_flag("sc05_husk_one_down") \
+			and player.global_position.x >= AMBUSH_X:
+		_begin_first()
+
+
+func _begin_first() -> void:
+	_fighting = true
+	set_combat(true)
+	_refresh_objective()
+	await _say("ambush")
+	husk_one.activate(player)
+
+
+func _begin_second() -> void:
+	_fighting = true
+	set_combat(true)
+	_refresh_objective()
+	husk_two.activate(player)
+
+
+func _on_husk_broken(husk: Husk) -> void:
+	if husk == husk_one:
+		GameState.set_flag("sc05_husk_one_down", true)
+		await _say("second")
+		_begin_second()
+	else:
+		GameState.set_flag("sc05_fight_done", true)
+		_fighting = false
+		set_combat(false)
+		await _after_fight()
+
+
+func _after_fight() -> void:
+	_refresh_people()
+	await _say("merchant")
+	GameState.set_flag("sc05_merchant_done", true)
+	_refresh_people()
+	_refresh_objective()
+
+
+func _on_defeated() -> void:
+	await _say("defeat")
+	player.global_position = ENTRANCE
+	player.restore_health()
+	var husk := husk_two if GameState.get_flag("sc05_husk_one_down") else husk_one
+	husk.reset_to_start()
+	husk.activate(player)
+
+
+func _on_struck(result: String) -> void:
+	if RESULT_CAPTIONS.has(result):
+		hud.show_caption(RESULT_CAPTIONS[result])
+
+
+func _on_husk_state(_husk: Husk, state: int) -> void:
+	if state == Husk.State.WINDUP:
+		hud.show_caption("[husk creaks: winding up]")
+
+
+func _on_used(target: Interactable) -> void:
+	match target.name:
+		"WayStation":
+			await _say("inspect_way_station")
+		"Merchant":
+			await _say("merchant_after")
+		"Nali":
+			if GameState.get_flag("sc05_complete"):
+				await _say("nali_after")
+			else:
+				await _say("nali")
+				GameState.set_flag("sc05_complete", true)
+		"Exit":
+			if GameState.get_flag("sc05_complete"):
+				_go_to("SC06")
+			elif GameState.get_flag("sc05_fight_done"):
+				await _say("exit_help_first")
+			else:
+				await _say("exit_husks")
+
+
+func _refresh_people() -> void:
+	merchant.set_active(GameState.get_flag("sc05_fight_done"))
+	nali.set_active(GameState.get_flag("sc05_merchant_done"))
+
+
+func _objective() -> String:
+	if GameState.get_flag("sc05_complete"):
+		return "Continue to Reed Gate with Nali."
+	if GameState.get_flag("sc05_merchant_done"):
+		return "Someone is treating a traveller by the road."
+	if _fighting:
+		return "Break the husk's copper connector."
+	if GameState.get_flag("sc05_arrived"):
+		return "Follow the Ash Road towards Reed Gate."
+	return ""

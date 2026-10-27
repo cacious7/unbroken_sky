@@ -12,6 +12,8 @@ A young courier seeks clean water after a river civilisation falls, and discover
 2. [Game script](narrative/FINAL_SCRIPT.md) — scenes, essential dialogue, playable objectives, choices, both endings, epilogue variants and encounter notes.
 3. [Implementation plan](development/IMPLEMENTATION_PLAN.md) — first sessions beginning 28 October, full milestones, systems, scope, assets, testing and review gates. Dates are intended work sessions, not automatic appointments.
 
+**Start here for development:** [Launch plan](development/LAUNCH_PLAN.md) — engine and platform decision, free Chapter One (Act One) on Android, 12-week route to a public release.
+
 ## Supporting documents
 
 - [World and character bible](narrative/WORLD_AND_CHARACTER_BIBLE.md) — canon, magic, chronology and reveal ledger.

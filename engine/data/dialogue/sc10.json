@@ -1,0 +1,43 @@
+{
+  "scene_id": "SC10",
+  "source": "Game Concept/narrative/FINAL_SCRIPT.md, SC10. Lines marked \"system\": true are gameplay feedback, hints or placeholder prompts that are not in the script; review them before release.",
+  "conversations": {
+    "arrive": [
+      {"id": "sc10_arrive_01", "speaker": "", "text": "Veya arrives. She recognises Kesi and raises a weapon."},
+      {"id": "sc10_arrive_02", "speaker": "VEYA", "text": "The woman who broke the renewal chamber."},
+      {"id": "sc10_arrive_03", "speaker": "KESI", "text": "The woman who opened it."},
+      {"id": "sc10_arrive_04", "speaker": "VEYA", "text": "My city heard the difference for one breath. Then it drowned."},
+      {"id": "sc10_arrive_05", "speaker": "NALI", "text": "Lower it. I need the platform to stay standing."},
+      {"id": "sc10_arrive_06", "speaker": "", "text": "Orun and his son Lio arrive with relief workers. Lio goes straight to the injured rather than the argument. Orun helps lift a brace before speaking."},
+      {"id": "sc10_arrive_07", "speaker": "ORUN", "text": "We can hate each other when everyone is above the waterline."}
+    ],
+    "wheel": [
+      {"id": "sc10_wheel_01", "speaker": "", "text": "Tavo fits the wheel to the repaired bypass. Clean water begins flowing towards the uplands."},
+      {"id": "sc10_wheel_02", "speaker": "", "text": "Veya keeps enough control to protect the remaining reservoir. The wheel stays installed."}
+    ],
+    "news": [
+      {"id": "sc10_news_01", "speaker": "ORUN", "text": "Mera has been hiding more than records."},
+      {"id": "sc10_news_02", "speaker": "TAVO", "text": "Everyone knows my mother except me."},
+      {"id": "sc10_news_03", "speaker": "ORUN", "text": "I knew the office she held. I am beginning to understand the person who left it."},
+      {"id": "sc10_news_04", "speaker": "", "text": "A messenger brings news. Mera has been detained at Red Hollow after admitting she helped the attackers. River troops are approaching under an order demanding her surrender."},
+      {"id": "sc10_news_05", "speaker": "", "text": "Sena is travelling under Daru's escort to the capital's relief court to challenge the order. The water repair buys several days; it does not end the danger."},
+      {"id": "sc10_news_06", "speaker": "KESI", "text": "If you want the part they won't put in the charge, come to the archive."},
+      {"id": "sc10_news_07", "speaker": "ORUN", "text": "Come with witnesses. Hers, mine and your own."}
+    ],
+    "bypass_after": [
+      {"id": "sc10_bypass_after_01", "speaker": "", "system": true, "text": "Clean water runs towards the uplands."}
+    ],
+    "veya": [
+      {"id": "sc10_veya_01", "speaker": "VEYA", "system": true, "text": "The wheel stays. The reservoir stays safe. That was the bargain."}
+    ],
+    "kesi": [
+      {"id": "sc10_kesi_01", "speaker": "KESI", "system": true, "text": "Not here. Not with her watching."}
+    ],
+    "orun": [
+      {"id": "sc10_orun_01", "speaker": "ORUN", "system": true, "text": "Lift first. Talk after."}
+    ],
+    "nali": [
+      {"id": "sc10_nali_01", "speaker": "NALI", "system": true, "text": "Help with the wheel. I have people to see to."}
+    ]
+  }
+}

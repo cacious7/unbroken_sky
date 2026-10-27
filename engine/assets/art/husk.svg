@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 96" width="72" height="96">
+  <!-- Covenant husk: an abandoned clay-and-copper maintenance shell. Invented design;
+       deliberately not based on any mask or ceremonial figure (research register R04/R05). -->
+  <ellipse cx="36" cy="90" rx="22" ry="5" fill="#000" opacity="0.3"/>
+  <!-- stubby legs -->
+  <rect x="20" y="70" width="11" height="18" rx="4" fill="#6e6158"/>
+  <rect x="41" y="70" width="11" height="18" rx="4" fill="#6e6158"/>
+  <!-- vessel body -->
+  <path d="M14 30 Q12 12 36 10 Q60 12 58 30 L60 66 Q58 78 36 79 Q14 78 12 66 Z" fill="#8c7b6c" stroke="#5c4f45" stroke-width="2"/>
+  <!-- cracks -->
+  <path d="M20 22 L26 34 L22 44" fill="none" stroke="#4e433b" stroke-width="1.5"/>
+  <path d="M52 48 L46 58 L50 70" fill="none" stroke="#4e433b" stroke-width="1.5"/>
+  <!-- copper bands -->
+  <path d="M13 36 Q36 42 59 36" fill="none" stroke="#b8692e" stroke-width="4"/>
+  <path d="M12 60 Q36 66 60 60" fill="none" stroke="#b8692e" stroke-width="4"/>
+  <!-- maintenance arms with tool ends -->
+  <path d="M13 40 Q2 48 6 62" fill="none" stroke="#6e6158" stroke-width="7" stroke-linecap="round"/>
+  <path d="M59 40 Q70 48 66 62" fill="none" stroke="#6e6158" stroke-width="7" stroke-linecap="round"/>
+  <rect x="2" y="60" width="9" height="6" rx="1" fill="#b8692e"/>
+  <rect x="61" y="60" width="9" height="6" rx="1" fill="#b8692e"/>
+  <!-- sensor slit -->
+  <rect x="24" y="22" width="24" height="5" rx="2.5" fill="#2a2420"/>
+  <rect x="30" y="23" width="12" height="3" rx="1.5" fill="#e0a050" opacity="0.8"/>
+  <!-- the copper connector (vulnerable point) -->
+  <circle cx="36" cy="50" r="7" fill="#c97a36" stroke="#7a4518" stroke-width="2"/>
+  <circle cx="36" cy="50" r="2.5" fill="#f0c080"/>
+</svg>

@@ -1,0 +1,49 @@
+{
+  "scene_id": "SC05",
+  "source": "Game Concept/narrative/FINAL_SCRIPT.md, SC05 and its encounter notes. Lines marked \"system\": true are gameplay feedback, hints or placeholder prompts that are not in the script; review them before release.",
+  "conversations": {
+    "arrive": [
+      {"id": "sc05_arrive_01", "speaker": "", "text": "A short route under intense sun. Tavo recognises cooler stone, shade and usable wind."}
+    ],
+    "ambush": [
+      {"id": "sc05_ambush_01", "speaker": "", "system": true, "text": "Beside the broken way station, a husk drags itself upright: an abandoned maintenance shell, still moving."},
+      {"id": "sc05_ambush_02", "speaker": "", "system": true, "text": "When it glows, it is winding up. Strike it then to interrupt, or dodge the blow."},
+      {"id": "sc05_ambush_03", "speaker": "", "system": true, "text": "After it strikes, its copper connector is exposed. Hit the connector with your repair hammer."}
+    ],
+    "second": [
+      {"id": "sc05_second_01", "speaker": "", "system": true, "text": "A second husk comes up the road."}
+    ],
+    "defeat": [
+      {"id": "sc05_defeat_01", "speaker": "", "system": true, "text": "Tavo stumbles back to the edge of the road. Catch your breath and try again."}
+    ],
+    "merchant": [
+      {"id": "sc05_merchant_01", "speaker": "", "text": "A merchant hides behind his cart."},
+      {"id": "sc05_merchant_02", "speaker": "MERCHANT", "text": "I shouted that I owned the road. They stopped."},
+      {"id": "sc05_merchant_03", "speaker": "TAVO", "text": "For how long?"},
+      {"id": "sc05_merchant_04", "speaker": "MERCHANT", "text": "Long enough to regret it."}
+    ],
+    "merchant_after": [
+      {"id": "sc05_merchant_after_01", "speaker": "MERCHANT", "system": true, "text": "I'll stay with the cart. The road can have its quiet back."}
+    ],
+    "inspect_way_station": [
+      {"id": "sc05_way_station_01", "speaker": "", "text": "A carved hand on one side; a shallow bowl on the other."},
+      {"id": "sc05_way_station_02", "speaker": "TAVO", "text": "The bowl is polished by use. The hand was gilded later."}
+    ],
+    "nali": [
+      {"id": "sc05_nali_01", "speaker": "", "text": "Nali is treating a traveller nearby. She has followed the same route to bring medicine to the fortress survivors."},
+      {"id": "sc05_nali_02", "speaker": "NALI", "text": "You've got blood on your sleeve."},
+      {"id": "sc05_nali_03", "speaker": "TAVO", "text": "Not mine."},
+      {"id": "sc05_nali_04", "speaker": "NALI", "text": "Then someone else needs the cloth."},
+      {"id": "sc05_nali_05", "speaker": "", "text": "She gives him a clean strip and takes the stained one for washing. They continue together."}
+    ],
+    "nali_after": [
+      {"id": "sc05_nali_after_01", "speaker": "NALI", "system": true, "text": "Reed Gate is ahead. Keep to the shade."}
+    ],
+    "exit_husks": [
+      {"id": "sc05_exit_husks_01", "speaker": "", "system": true, "text": "Not with husks on the road."}
+    ],
+    "exit_help_first": [
+      {"id": "sc05_exit_help_first_01", "speaker": "", "system": true, "text": "Someone by the road is treating a wounded traveller."}
+    ]
+  }
+}

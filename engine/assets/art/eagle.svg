@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 96" width="128" height="96">
+  <!-- Tavo's eagle form, seen from above, flying right. Colouring follows the African
+       fish eagle (Zambia's national bird, research register R01): white head and chest,
+       chestnut body, dark wings. Original drawing. -->
+  <!-- far wing -->
+  <path d="M58 44 Q44 8 14 4 Q26 18 30 30 Q18 26 8 28 Q24 38 40 46 Z" fill="#1e1712"/>
+  <path d="M30 30 Q36 34 44 40" stroke="#3a2d22" stroke-width="2" fill="none"/>
+  <!-- near wing -->
+  <path d="M58 52 Q44 88 14 92 Q26 78 30 66 Q18 70 8 68 Q24 58 40 50 Z" fill="#241c16"/>
+  <path d="M30 66 Q36 62 44 56" stroke="#3a2d22" stroke-width="2" fill="none"/>
+  <!-- tail -->
+  <path d="M40 42 L20 40 L22 48 L20 56 L40 54 Z" fill="#f2efe8" stroke="#c9c3b8" stroke-width="1"/>
+  <!-- body -->
+  <ellipse cx="66" cy="48" rx="28" ry="12" fill="#7a3b1e"/>
+  <!-- white chest and head -->
+  <path d="M78 38 Q96 36 104 48 Q96 60 78 58 Q86 48 78 38 Z" fill="#f4f1ea"/>
+  <circle cx="102" cy="48" r="9" fill="#f7f4ee"/>
+  <!-- beak and eye -->
+  <path d="M110 45 L120 48 L110 51 Z" fill="#e3b33a"/>
+  <path d="M118 47.5 L121 50 L117 50 Z" fill="#2a2016"/>
+  <circle cx="105" cy="45" r="1.6" fill="#2a2016"/>
+</svg>

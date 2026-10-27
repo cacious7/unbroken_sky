@@ -1,0 +1,126 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/wheel_platform.gd" id="1_platform"]
+[ext_resource type="Script" path="res://scripts/block.gd" id="2_block"]
+[ext_resource type="Script" path="res://scripts/interactable.gd" id="3_inter"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="4_player"]
+[ext_resource type="Script" path="res://scripts/hud.gd" id="5_hud"]
+[ext_resource type="Script" path="res://scripts/touch_controls.gd" id="6_touch"]
+[ext_resource type="Script" path="res://scripts/dialogue_box.gd" id="7_dialogue"]
+
+[sub_resource type="RectangleShape2D" id="player_shape"]
+size = Vector2(18, 26)
+
+[node name="WheelPlatform" type="Node2D"]
+script = ExtResource("1_platform")
+
+[node name="Ground" type="ColorRect" parent="."]
+offset_left = -480.0
+offset_top = -300.0
+offset_right = 1440.0
+offset_bottom = 840.0
+mouse_filter = 2
+color = Color(0.16, 0.2, 0.24, 1)
+
+[node name="Platform" type="ColorRect" parent="."]
+offset_left = 60.0
+offset_top = 60.0
+offset_right = 900.0
+offset_bottom = 480.0
+mouse_filter = 2
+color = Color(0.5, 0.47, 0.42, 1)
+
+[node name="Channel" type="ColorRect" parent="."]
+offset_left = 640.0
+offset_top = 60.0
+offset_right = 700.0
+offset_bottom = 480.0
+mouse_filter = 2
+color = Color(0.4, 0.36, 0.32, 1)
+
+[node name="EdgeTop" type="StaticBody2D" parent="."]
+position = Vector2(480, 52)
+script = ExtResource("2_block")
+size = Vector2(856, 16)
+color = Color(0.35, 0.33, 0.3, 1)
+
+[node name="EdgeBottom" type="StaticBody2D" parent="."]
+position = Vector2(480, 488)
+script = ExtResource("2_block")
+size = Vector2(856, 16)
+color = Color(0.35, 0.33, 0.3, 1)
+
+[node name="EdgeLeft" type="StaticBody2D" parent="."]
+position = Vector2(52, 270)
+script = ExtResource("2_block")
+size = Vector2(16, 452)
+color = Color(0.35, 0.33, 0.3, 1)
+
+[node name="EdgeRight" type="StaticBody2D" parent="."]
+position = Vector2(908, 270)
+script = ExtResource("2_block")
+size = Vector2(16, 452)
+color = Color(0.35, 0.33, 0.3, 1)
+
+[node name="Bypass" type="Area2D" parent="."]
+position = Vector2(670, 260)
+script = ExtResource("3_inter")
+body_size = Vector2(70, 50)
+color = Color(0.75, 0.5, 0.25, 1)
+label = "REPAIRED BYPASS"
+prompt = "Fit the release wheel"
+
+[node name="Veya" type="Area2D" parent="."]
+position = Vector2(520, 150)
+script = ExtResource("3_inter")
+body_size = Vector2(20, 28)
+color = Color(0.6, 0.3, 0.3, 1)
+label = "VEYA"
+prompt = "Talk to Veya"
+
+[node name="Kesi" type="Area2D" parent="."]
+position = Vector2(200, 140)
+script = ExtResource("3_inter")
+body_size = Vector2(20, 28)
+color = Color(0.4, 0.38, 0.3, 1)
+label = "KESI"
+prompt = "Talk to Kesi"
+
+[node name="Orun" type="Area2D" parent="."]
+position = Vector2(400, 380)
+script = ExtResource("3_inter")
+body_size = Vector2(20, 28)
+color = Color(0.85, 0.8, 0.6, 1)
+label = "ORUN"
+prompt = "Talk to Orun"
+
+[node name="Lio" type="StaticBody2D" parent="."]
+position = Vector2(470, 410)
+script = ExtResource("2_block")
+size = Vector2(20, 28)
+color = Color(0.75, 0.7, 0.55, 1)
+label = "LIO"
+
+[node name="Nali" type="Area2D" parent="."]
+position = Vector2(300, 260)
+script = ExtResource("3_inter")
+body_size = Vector2(20, 28)
+color = Color(0.3, 0.5, 0.6, 1)
+label = "NALI"
+prompt = "Talk to Nali"
+
+[node name="Player" type="CharacterBody2D" parent="."]
+position = Vector2(820, 400)
+script = ExtResource("4_player")
+
+[node name="Shape" type="CollisionShape2D" parent="Player"]
+shape = SubResource("player_shape")
+
+[node name="Hud" type="CanvasLayer" parent="."]
+script = ExtResource("5_hud")
+
+[node name="TouchControls" type="CanvasLayer" parent="."]
+script = ExtResource("6_touch")
+
+[node name="Dialogue" type="CanvasLayer" parent="."]
+script = ExtResource("7_dialogue")
