@@ -1,0 +1,59 @@
+{
+  "project": "The Unbroken Sky",
+  "version": "1.1",
+  "writing_completed": "2026-10-27",
+  "planned_first_session": "2026-10-28",
+  "status": "complete prose story and game script; implementation planned, not started",
+  "prose_ending": "shared containment",
+  "game_endings": [
+    "central seat",
+    "shared containment"
+  ],
+  "files": [
+    {
+      "path": "DECISIONS.md",
+      "words": 647,
+      "sha256": "6c5b0c94dcc831b077d68720495ce79eac1f0d3c89442cd8b383a0f676cac605"
+    },
+    {
+      "path": "README.md",
+      "words": 371,
+      "sha256": "ad23a761c45713e983759972eba3b5283b3864f347a854a46aae9e986203ae71"
+    },
+    {
+      "path": "development/CHOICES_AND_STATE.md",
+      "words": 815,
+      "sha256": "8ec124066b3f6d9946dcc9c2bda09ee0edcc60645a65f1a6206f722462e508ce"
+    },
+    {
+      "path": "development/FIRST_BUILD_PLAN.md",
+      "words": 1000,
+      "sha256": "5982301bf8f749f14211b3123c438ec5588bc213cc0c5bbabb901b5c565cc522"
+    },
+    {
+      "path": "development/IMPLEMENTATION_PLAN.md",
+      "words": 2309,
+      "sha256": "4dc865d0dd367b3dcb795c5df61273969df64b96b22a84290a0dbddff6e5615e"
+    },
+    {
+      "path": "narrative/FINAL_SCRIPT.md",
+      "words": 8005,
+      "sha256": "057e5626589a08622f29e2a6cc1fc61a474d8aa32e53074eb581f2a747070670"
+    },
+    {
+      "path": "narrative/FULL_STORY.md",
+      "words": 6722,
+      "sha256": "d8098b644c615c08be7717364564cdb80adbe030ead07439f46f02f76ee7900e"
+    },
+    {
+      "path": "narrative/WORLD_AND_CHARACTER_BIBLE.md",
+      "words": 2283,
+      "sha256": "ce793ed14daf1d76f8200b5e266d5d6dd046d89bc372fc91c9209b4902a642db"
+    },
+    {
+      "path": "research/RESEARCH_AND_INSPIRATION.md",
+      "words": 1602,
+      "sha256": "b14f2826ed06b6b574b0fd36700f3057755440f74e10bfc224400784b9579dfa"
+    }
+  ]
+}
