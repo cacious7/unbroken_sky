@@ -23,7 +23,8 @@ func _ready() -> void:
 	player.focus_changed.connect(hud.show_prompt)
 	player.focus_changed.connect(_update_action_label.unbind(1))
 	player.health_changed.connect(hud.set_health)
-	player.struck.connect(_play_strike_sound)
+	player.struck.connect(_on_strike)
+	player.health_changed.connect(_on_health_changed)
 	hud.set_health(player.health, Player.MAX_HEALTH)
 	hud.show_key_hints = not touch.device_has_touch
 	hud.restart_requested.connect(_restart)
@@ -100,20 +101,83 @@ func set_combat(on: bool) -> void:
 	_update_action_label()
 
 
-## The hammer sounds different depending on what it hits: a light ring off a shell,
-## a solid clang on a connector, a deep one when something breaks.
-func _play_strike_sound(result: String) -> void:
+## Combat feedback by result: a light ring off a shell; a solid hit with a moment of
+## hit-stop, a small shake and a buzz on a connector; bigger for a break.
+func _on_strike(result: String) -> void:
 	match result:
 		"deflect":
 			Sfx.play("hammer_clang", -8.0, 1.35)
 		"interrupt", "hit":
 			Sfx.play("hammer_clang")
+			hit_stop(0.06)
+			shake(3.0)
+			_vibrate(30)
 		"break":
 			Sfx.play("hammer_clang", 2.0, 0.75)
+			hit_stop(0.12)
+			shake(6.0)
+			_vibrate(60)
 
 
+var _last_health := Player.MAX_HEALTH
+
+
+func _on_health_changed(current: int, _maximum: int) -> void:
+	if current < _last_health:
+		hud.flash_damage()
+		shake(5.0)
+		_vibrate(80)
+	_last_health = current
+
+
+## Freezes the action for a moment so a hit lands with weight.
+func hit_stop(seconds: float) -> void:
+	Engine.time_scale = 0.05
+	await get_tree().create_timer(seconds, true, false, true).timeout
+	Engine.time_scale = 1.0
+
+
+## Shakes the view only (the viewport's canvas transform), so nothing's real position
+## changes and taps, paths and collisions are unaffected.
+var shake_offset := Vector2.ZERO:
+	set(value):
+		shake_offset = value
+		if is_inside_tree():
+			get_viewport().canvas_transform = Transform2D(0.0, value)
+
+
+func shake(strength: float) -> void:
+	if not Settings.shake_on:
+		return
+	var tween := create_tween().set_ignore_time_scale()
+	for i in 4:
+		var offset := Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * strength
+		tween.tween_property(self, "shake_offset", offset, 0.03)
+	tween.tween_property(self, "shake_offset", Vector2.ZERO, 0.03)
+
+
+func _vibrate(milliseconds: int) -> void:
+	if Settings.shake_on:
+		Input.vibrate_handheld(milliseconds)
+
+
+func _exit_tree() -> void:
+	# Never leave the game slowed down or the view offset if the scene changes mid-effect.
+	Engine.time_scale = 1.0
+	get_viewport().canvas_transform = Transform2D.IDENTITY
+
+
+## The touch action button names what it will do: the first word of the object's prompt
+## ("TALK", "SEARCH", "LOOK"...), STRIKE in combat with nothing in reach, else USE.
 func _update_action_label() -> void:
-	touch.set_action_label("STRIKE" if player.combat_enabled and not player.has_focus_target() else "USE")
+	touch.set_action_label(action_verb(player.focus_target(), player.combat_enabled))
+
+
+static func action_verb(target: Interactable, in_combat: bool) -> String:
+	if target != null:
+		var verb := target.prompt.get_slice(" ", 0).to_upper()
+		return verb if verb.length() <= 7 else "USE"
+	return "STRIKE" if in_combat else "USE"
 
 
 func _go_to(scene_id: String) -> void:

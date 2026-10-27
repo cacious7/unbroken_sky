@@ -26,6 +26,9 @@ var _stick_origin := Vector2.ZERO
 var _stick_vector := Vector2.ZERO
 var _combat := false
 var _action_label := "USE"
+## Brief highlight on the button just pressed: "action" or "dodge".
+var _flash_button := ""
+var _flash_left := 0.0
 
 
 func _ready() -> void:
@@ -58,6 +61,24 @@ func set_action_label(text: String) -> void:
 	_canvas.queue_redraw()
 
 
+func action_label() -> String:
+	return _action_label
+
+
+func _flash(button: String) -> void:
+	_flash_button = button
+	_flash_left = 0.15
+	_canvas.queue_redraw()
+
+
+func _process(delta: float) -> void:
+	if _flash_left > 0.0:
+		_flash_left -= delta
+		if _flash_left <= 0.0:
+			_flash_button = ""
+		_canvas.queue_redraw()
+
+
 func _input(event: InputEvent) -> void:
 	if not visible:
 		return
@@ -67,8 +88,10 @@ func _input(event: InputEvent) -> void:
 				return
 			get_viewport().set_input_as_handled()
 			if event.position.distance_to(_button_centre()) <= BUTTON_RADIUS * 1.3:
+				_flash("action")
 				interact_pressed.emit()
 			elif _combat and event.position.distance_to(_dodge_centre()) <= DODGE_RADIUS * 1.3:
+				_flash("dodge")
 				dodge_pressed.emit()
 			else:
 				_pending[event.index] = event.position
@@ -120,12 +143,15 @@ func _draw_controls() -> void:
 	var base := _stick_origin if _stick_index != -1 else Vector2(110, _canvas.size.y - 110)
 	_canvas.draw_circle(base, STICK_RADIUS, Color(1, 1, 1, 0.15))
 	_canvas.draw_circle(base + _stick_vector * STICK_RADIUS, 24, Color(1, 1, 1, 0.45))
-	_draw_button(_button_centre(), BUTTON_RADIUS, _action_label)
+	_draw_button(_button_centre(), BUTTON_RADIUS, _action_label, _flash_button == "action")
 	if _combat:
-		_draw_button(_dodge_centre(), DODGE_RADIUS, "DODGE")
+		_draw_button(_dodge_centre(), DODGE_RADIUS, "DODGE", _flash_button == "dodge")
 
 
-func _draw_button(centre: Vector2, radius: float, text: String) -> void:
-	_canvas.draw_circle(centre, radius, Color(1, 1, 1, 0.3))
-	_canvas.draw_string(ThemeDB.fallback_font, centre + Vector2(-50, 7), text,
-			HORIZONTAL_ALIGNMENT_CENTER, 100, 18, Color(1, 1, 1, 0.9))
+func _draw_button(centre: Vector2, radius: float, text: String, pressed: bool) -> void:
+	_canvas.draw_circle(centre, radius * (0.92 if pressed else 1.0), Color(1, 1, 1, 0.6 if pressed else 0.3))
+	_canvas.draw_arc(centre, radius, 0.0, TAU, 40, Color(0, 0, 0, 0.35), 2.0)
+	var font := ThemeDB.fallback_font
+	var position := centre + Vector2(-50, 7)
+	_canvas.draw_string_outline(font, position, text, HORIZONTAL_ALIGNMENT_CENTER, 100, 18, 4, Color(0, 0, 0, 0.6))
+	_canvas.draw_string(font, position, text, HORIZONTAL_ALIGNMENT_CENTER, 100, 18, Color(1, 1, 1, 0.95))

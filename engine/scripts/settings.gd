@@ -15,6 +15,8 @@ var text_speed := 0
 ## Wider landing zones, longer airtime and weaker gusts for eagle flight.
 var flight_assist := false
 var sound_on := true
+## Screen shake and phone vibration on hits. Off for players sensitive to motion.
+var shake_on := true
 
 
 func _ready() -> void:
@@ -58,6 +60,11 @@ func toggle_sound() -> void:
 	_save_and_notify()
 
 
+func toggle_shake() -> void:
+	shake_on = not shake_on
+	_save_and_notify()
+
+
 func _apply_sound() -> void:
 	AudioServer.set_bus_mute(0, not sound_on)
 
@@ -72,6 +79,7 @@ func load_settings() -> void:
 	text_speed = _index_or_default(data.get("text_speed"), TEXT_SPEEDS.size())
 	flight_assist = data.get("flight_assist") == true
 	sound_on = data.get("sound_on") != false
+	shake_on = data.get("shake_on") != false
 	_apply_sound()
 
 
@@ -86,5 +94,5 @@ func _save_and_notify() -> void:
 	if file != null:
 		file.store_string(JSON.stringify({
 			"text_size": text_size, "text_speed": text_speed, "flight_assist": flight_assist,
-			"sound_on": sound_on}))
+			"sound_on": sound_on, "shake_on": shake_on}))
 	changed.emit()

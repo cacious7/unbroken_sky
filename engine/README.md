@@ -91,3 +91,11 @@ Controls (all work together; any direct movement cancels a tap-walk):
 - Title screen: original dawn backdrop with the eagle, outlined title.
 - Dialogue portraits: the speaker's head is cut from their character sprite (characters now import at 3× so close-ups stay sharp); voices without a sprite (WHISPER, VOICE, CHILD ONE) show none. Eren has a generated sprite for his portrait.
 - Verified: 127 headless checks pass (adds prologue play-through and skip, portraits, SC01 in the full-chapter run). Title, prologue and portrait reviewed as screenshots.
+
+### 27 October 2026: session 1, continued (controls and combat feel)
+
+- Owner feedback: synthesised audio is poor (replace with real recorded/licensed sound later); current art is good enough for now; focus on gameplay and controls.
+- Tap-to-walk now pathfinds around walls and solid objects (`NavGrid`, an AStarGrid2D rebuilt from the scene's solid rectangles at each tap, so appearing characters are respected). Partial paths end as close as possible to an unreachable point.
+- Combat: tapping a husk walks up to it and swings. Hits now have hit-stop (0.06 s, 0.12 s on a break), a small husk knockback (~12 px, stays in hammer reach), view-only screen shake, phone vibration and a red damage flash. Pause menu: "Shake & vibration: On/Off". Android vibrate permission added.
+- Touch: the action button names its action from the object's prompt (TALK, SEARCH, LOOK, LIFT…), STRIKE in combat; buttons highlight when pressed.
+- Verified: 134 headless checks pass (adds zig-zag stair pathfinding, walking round the well, tap-to-attack, knockback, hit-stop recovery, shake reset, action verbs).

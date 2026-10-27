@@ -18,6 +18,7 @@ var _health_row: HBoxContainer
 var _caption: Label
 var _caption_tween: Tween
 var _combat_hint: Label
+var _damage_flash: ColorRect
 ## [control, base font size] pairs rescaled when the text size setting changes.
 var _scaled: Array = []
 
@@ -79,6 +80,12 @@ func show_caption(text: String) -> void:
 	_caption_tween.tween_property(_caption, "modulate:a", 0.0, 0.4)
 
 
+## A soft red pulse at the screen edge when Tavo is hit (once, not a strobe).
+func flash_damage() -> void:
+	_damage_flash.color.a = 0.3
+	create_tween().tween_property(_damage_flash, "color:a", 0.0, 0.4)
+
+
 func caption_text() -> String:
 	return _caption.text if _caption.modulate.a > 0.0 else ""
 
@@ -101,6 +108,12 @@ func _build() -> void:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
+
+	_damage_flash = ColorRect.new()
+	_damage_flash.color = Color(0.8, 0.1, 0.05, 0.0)
+	_damage_flash.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_damage_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_damage_flash)
 
 	_objective_panel = PanelContainer.new()
 	_objective_panel.add_theme_stylebox_override("panel", _panel_style())

@@ -24,6 +24,9 @@ const STRIKE_SPEED := 340.0
 const RECOVERY_SECONDS := 1.2
 ## The strike lands if Tavo is this close to the husk's edge during the lunge.
 const HIT_DISTANCE := 26.0
+## Stagger after a hammer hit: about 12 px of travel.
+const KNOCKBACK_SPEED := 180.0
+const KNOCKBACK_DECEL := 1400.0
 
 @export var max_health := 3
 
@@ -35,6 +38,7 @@ var target: Player = null
 var _left := 0.0
 var _lunge := Vector2.RIGHT
 var _landed_hit := false
+var _knockback := Vector2.ZERO
 var _start_position := Vector2.ZERO
 
 
@@ -87,10 +91,12 @@ func take_hammer() -> String:
 	match state:
 		State.WINDUP:
 			_enter(State.RECOVERY)
+			_knock_back()
 			return "interrupt"
 		State.RECOVERY:
 			health -= 1
 			if health > 0:
+				_knock_back()
 				queue_redraw()
 				return "hit"
 			collision_layer = 0
@@ -124,16 +130,24 @@ func _physics_process(delta: float) -> void:
 			if _left <= 0.0:
 				_enter(State.RECOVERY)
 		State.RECOVERY:
-			velocity = Vector2.ZERO
+			# A short stagger backwards after a hit, small enough to stay in hammer reach.
+			velocity = _knockback
+			_knockback = _knockback.move_toward(Vector2.ZERO, KNOCKBACK_DECEL * delta)
 			if _left <= 0.0:
 				_enter(State.APPROACH)
 	move_and_slide()
 	queue_redraw()
 
 
+func _knock_back() -> void:
+	if target != null:
+		_knockback = (global_position - target.global_position).normalized() * KNOCKBACK_SPEED
+
+
 func _enter(new_state: State) -> void:
 	state = new_state
 	_landed_hit = false
+	_knockback = Vector2.ZERO
 	match new_state:
 		State.WINDUP:
 			_left = WINDUP_SECONDS

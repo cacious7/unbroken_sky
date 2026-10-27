@@ -44,6 +44,10 @@ var _focus: Interactable = null
 var _walking := false
 var _walk_point := Vector2.ZERO
 var _walk_target: Interactable = null
+## Waypoints around obstacles, from NavGrid.
+var _path := PackedVector2Array()
+## A husk (or other hammer target) tapped in combat: walk up to it and swing.
+var _attack_target: Node2D = null
 var _stuck_time := 0.0
 ## Dodges and knockback both move Tavo along a fixed direction for a short time.
 var _dash_left := 0.0
@@ -97,6 +101,12 @@ func _physics_process(delta: float) -> void:
 		var target := _walk_target
 		cancel_walk()
 		target.used.emit(target)
+	elif _walking and _attack_target != null:
+		if not _attack_target.is_threat():
+			cancel_walk()
+		elif _distance_to_target(_attack_target) <= ATTACK_RANGE - 4.0:
+			cancel_walk()
+			attack()
 
 
 func _draw() -> void:
@@ -112,7 +122,7 @@ func _draw() -> void:
 	if _swing_left > 0.0:
 		draw_arc(Vector2.ZERO, ATTACK_RANGE, facing.angle() - 0.8, facing.angle() + 0.8, 12,
 				Color(1, 1, 1, 0.9), 4.0)
-	if _walking and _walk_target == null:
+	if _walking and _walk_target == null and _attack_target == null:
 		draw_arc(to_local(_walk_point), 9.0, 0.0, TAU, 24, Color(1, 1, 1, 0.8), 2.0)
 
 
@@ -148,6 +158,10 @@ func try_interact() -> void:
 
 func has_focus_target() -> bool:
 	return _focus != null
+
+
+func focus_target() -> Interactable:
+	return _focus
 
 
 func attack() -> void:
@@ -208,16 +222,29 @@ func walk_to_screen(screen_point: Vector2) -> void:
 	walk_to(get_canvas_transform().affine_inverse() * screen_point)
 
 
-## Walk to a world position. If an object is there, walk to it and use it.
+## Walk to a world position, finding a way around obstacles. If an object is there,
+## walk to it and use it; in combat, if a husk is there, walk up to it and strike.
 func walk_to(world_point: Vector2) -> void:
 	if not active:
 		return
+	cancel_walk()
+	if combat_enabled:
+		var enemy := _threat_at(world_point)
+		if enemy != null:
+			if _distance_to_target(enemy) <= ATTACK_RANGE - 4.0:
+				attack()
+				return
+			_attack_target = enemy
+			_walk_point = enemy.global_position
+			_walking = true
+			return
 	var target := _interactable_at(world_point)
 	if target != null and _nearby.has(target):
 		target.used.emit(target)
 		return
 	_walk_target = target
 	_walk_point = target.global_position if target != null else world_point
+	_path = NavGrid.find_path(get_parent(), global_position, _walk_point)
 	_walking = true
 	_stuck_time = 0.0
 	queue_redraw()
@@ -226,7 +253,14 @@ func walk_to(world_point: Vector2) -> void:
 func cancel_walk() -> void:
 	_walking = false
 	_walk_target = null
+	_attack_target = null
+	_path.clear()
+	_stuck_time = 0.0
 	queue_redraw()
+
+
+func path_points() -> PackedVector2Array:
+	return _path
 
 
 func is_walking() -> bool:
@@ -253,11 +287,31 @@ func _dash(direction: Vector2, speed: float, seconds: float) -> void:
 
 
 func _walk_direction() -> Vector2:
+	# Husks move, so head straight for them.
+	if _attack_target != null:
+		return (_attack_target.global_position - global_position).normalized()
+	while _path.size() > 0 and global_position.distance_to(_path[0]) <= ARRIVE_DISTANCE:
+		_path.remove_at(0)
+	if _path.size() > 0:
+		return (_path[0] - global_position).normalized()
+	# Off the end of the path: close the last gap to the exact point or object.
 	var offset := _walk_point - global_position
 	if _walk_target == null and offset.length() <= ARRIVE_DISTANCE:
 		cancel_walk()
 		return Vector2.ZERO
 	return offset.normalized()
+
+
+func _distance_to_target(target: Node2D) -> float:
+	return global_position.distance_to(target.global_position) - float(target.hit_radius)
+
+
+func _threat_at(world_point: Vector2) -> Node2D:
+	for node in get_tree().get_nodes_in_group("hammer_target"):
+		var target := node as Node2D
+		if target.is_threat() and target.global_position.distance_to(world_point) <= target.hit_radius + 26.0:
+			return target
+	return null
 
 
 func _check_stuck(before: Vector2, delta: float) -> void:

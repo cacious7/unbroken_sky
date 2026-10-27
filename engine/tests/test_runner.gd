@@ -43,6 +43,9 @@ func _ready() -> void:
 	await _test_sc02_sequence()
 	await _test_sc02_resume()
 	await _test_tap_to_walk()
+	await _test_pathfinding()
+	await _test_combat_controls()
+	_test_action_verbs()
 	await _test_sc03_paths()
 	await _test_sc03_resume()
 	await _test_sc04()
@@ -315,6 +318,83 @@ func _test_tap_to_walk() -> void:
 	var mera: Interactable = yard.get_node("Mera")
 	_check(not mera.hit_test(mera.global_position), "hidden characters cannot be tapped")
 	await _close(yard)
+
+
+# --- Controls -----------------------------------------------------------------
+
+func _point_in_solid(scene: Node, point: Vector2) -> bool:
+	for rect in NavGrid.solid_rects(scene):
+		if rect.has_point(point):
+			return true
+	return false
+
+
+func _test_pathfinding() -> void:
+	# The flood room's zig-zag stair: one path from the bottom to the broken wall.
+	_start_at("SC08")
+	GameState.set_flag("sc08_talked", true)
+	var room := await _spawn(KEEPER_ROOM)
+	room.get_node("FloodWater").rising = false
+	var path := NavGrid.find_path(room, room.ROUTE_START, Vector2(480, 60))
+	var blocked := 0
+	for point in path:
+		if _point_in_solid(room, point):
+			blocked += 1
+	_check(path.size() > 10 and path[-1].y < 120.0 and blocked == 0,
+			"pathfinding: tap-walk finds the zig-zag stair route without crossing walls")
+	await _close(room)
+
+	# Walking round the well to a spot directly behind it, which a straight line can't reach.
+	GameState.new_game()
+	GameState.set_flag("sc02_intro_seen", true)
+	var yard := await _spawn(WELL_YARD)
+	var player: Player = yard.player
+	player.global_position = Vector2(430, 290)
+	player.walk_to(Vector2(430, 172))
+	await _physics_frames(150)
+	_check(player.global_position.distance_to(Vector2(430, 172)) < 8.0,
+			"pathfinding: Tavo walks around the well instead of stopping at it")
+	await _close(yard)
+
+
+func _test_combat_controls() -> void:
+	_start_at("SC05")
+	GameState.set_flag("sc05_arrived", true)
+	var road := await _spawn(ASH_ROAD)
+	var husk: Husk = road.get_node("HuskOne")
+	var player: Player = road.player
+	road._fighting = true
+	road.set_combat(true)
+	husk.activate(player)
+	husk._enter(Husk.State.RECOVERY)
+	husk._left = 5.0
+	player.global_position = husk.global_position + Vector2(-110, 0)
+	var swings := []
+	player.struck.connect(func(result: String) -> void: swings.append(result))
+	player.walk_to(husk.global_position)
+	await _physics_frames(60)
+	_check(swings.has("hit"), "combat: tapping a husk walks up to it and strikes")
+	_check(husk.global_position.x > husk._start_position.x, "combat: a hammer hit knocks the husk back")
+
+	await _physics_frames(10)
+	_check(is_equal_approx(Engine.time_scale, 1.0), "combat: hit-stop always returns to normal speed")
+	road.shake(5.0)
+	await _physics_frames(20)
+	_check(road.get_viewport().canvas_transform.origin == Vector2.ZERO and road.position == Vector2.ZERO,
+			"combat: screen shake moves only the view and settles back to rest")
+	await _close(road)
+
+
+func _test_action_verbs() -> void:
+	var sena := Interactable.new()
+	sena.prompt = "Talk to Sena"
+	var pipe := Interactable.new()
+	pipe.prompt = "Lift the pipe together"
+	_check(StoryScene.action_verb(sena, false) == "TALK" and StoryScene.action_verb(pipe, true) == "LIFT"
+			and StoryScene.action_verb(null, true) == "STRIKE" and StoryScene.action_verb(null, false) == "USE",
+			"touch: the action button names the action (TALK, LIFT, STRIKE, USE)")
+	sena.free()
+	pipe.free()
 
 
 # --- SC03 ---------------------------------------------------------------------

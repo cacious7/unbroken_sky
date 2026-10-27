@@ -12,6 +12,7 @@ var _size_button: Button
 var _speed_button: Button
 var _assist_button: Button
 var _sound_button: Button
+var _shake_button: Button
 
 
 func _ready() -> void:
@@ -64,6 +65,7 @@ func _refresh() -> void:
 	_speed_button.text = "Text speed: %s" % Settings.text_speed_name()
 	_assist_button.text = "Flight assist: %s" % ("On" if Settings.flight_assist else "Off")
 	_sound_button.text = "Sound: %s" % ("On" if Settings.sound_on else "Off")
+	_shake_button.text = "Shake & vibration: %s" % ("On" if Settings.shake_on else "Off")
 	for button in _menu.find_children("", "Button", true, false):
 		button.add_theme_font_size_override("font_size", Settings.font_size(20))
 
@@ -120,13 +122,15 @@ func _build() -> void:
 	column.add_child(_assist_button)
 	_sound_button = _button("", Settings.toggle_sound)
 	column.add_child(_sound_button)
+	_shake_button = _button("", Settings.toggle_shake)
+	column.add_child(_shake_button)
 	column.add_child(_button("Title screen", _to_title))
 
 
 func _button(text: String, action: Callable) -> Button:
 	var button := Button.new()
 	button.text = text
-	button.custom_minimum_size = Vector2(300, 52)
+	button.custom_minimum_size = Vector2(300, 46)
 	button.pressed.connect(action)
 	return button
 
