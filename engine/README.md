@@ -99,3 +99,11 @@ Controls (all work together; any direct movement cancels a tap-walk):
 - Combat: tapping a husk walks up to it and swings. Hits now have hit-stop (0.06 s, 0.12 s on a break), a small husk knockback (~12 px, stays in hammer reach), view-only screen shake, phone vibration and a red damage flash. Pause menu: "Shake & vibration: On/Off". Android vibrate permission added.
 - Touch: the action button names its action from the object's prompt (TALK, SEARCH, LOOK, LIFT…), STRIKE in combat; buttons highlight when pressed.
 - Verified: 134 headless checks pass (adds zig-zag stair pathfinding, walking round the well, tap-to-attack, knockback, hit-stop recovery, shake reset, action verbs).
+
+### 27 October 2026: session 1, continued (release preparation)
+
+- Upload key (PKCS12, RSA 4096, alias `upload`) created at `%USERPROFILE%\.unbroken_sky_keys\upload.keystore`, with its password in `upload_key_credentials.txt` beside it. Both are outside the repo and outside OneDrive; **the owner must back both up**.
+- New export preset "Android Release AAB" (Gradle build, arm64 + armeabi-v7a, signed). The Gradle project lives in `%USERPROFILE%\.unbroken_sky_build\android`, because inside OneDrive it grew to 1.3 GB and OneDrive locked files mid-build.
+- `tools/build_release.sh` runs tests, then builds the signed AAB (`build/android/unbroken_sky.aab`, 52.8 MB for both architectures; Play serves each phone only its own part) and the itch.io zip (`build/unbroken_sky_web.zip`, 10.6 MB, via `tools/zip_web.gd`). Run it from PowerShell with `& "C:\Program Files\Git\bin\bash.exe" --login engine/tools/build_release.sh` (or from Git Bash directly). Gradle's daemon is disabled so Godot exits when done.
+- Store kit: `store/STORE_LISTING.md` (Play text, content-rating and data-safety draft answers, itch.io setup, pre-upload checklist) and `store/graphics/` (512 icon, 1024×500 feature graphic, seven 1920×1080 screenshots, rendered by `tests/store_shots.tscn`). Privacy policy: `docs/privacy-policy.html` (contact address still a placeholder).
+- Still needed from the owner: permanent package name, public contact email, Google Play developer account, closed-test testers.
