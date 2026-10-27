@@ -5,7 +5,7 @@ extends RefCounted
 ## pack has (the well, pump, mud-brick house, cistern, cart, culvert, bypass wheel...).
 ## `size` is the object's footprint in metres (x across, y depth).
 
-const KENNEY := "res://assets/third_party/kenney/"
+const THIRD_PARTY := "res://assets/third_party/"
 
 ## Characters standing in as scene objects.
 const FIGURES := {
@@ -24,7 +24,7 @@ static func build(object_name: String, size: Vector2) -> Node3D:
 		return root
 	match object_name:
 		"Well":
-			_cyl(root, 0.85, 0.95, 0.75, Color("#9a9288"), Vector3(0, 0.37, 0))
+			_skin(_cyl(root, 0.85, 0.95, 0.75, Color("#9a9288"), Vector3(0, 0.37, 0)), "stone")
 			_cyl(root, 0.62, 0.62, 0.77, Color("#1d2a33"), Vector3(0, 0.38, 0))
 			_cyl(root, 0.6, 0.6, 0.02, Color("#2c4a5e"), Vector3(0, 0.6, 0))
 		"Pump":
@@ -35,10 +35,10 @@ static func build(object_name: String, size: Vector2) -> Node3D:
 			handle.rotation.x = -0.5
 			_sphere(root, 0.07, Color("#c97a36"), Vector3(0, 1.15, 0))
 		"Basket":
-			_model(root, "survival/bucket.glb", 0.8)
-			_model(root, "survival/tool-hammer.glb", 0.5, Vector3(0.1, 0.35, 0), Vector3(0, 0, 0.6))
+			# A woven basket: thatch texture on a tapered drum, tools sticking out.
+			_model(root, "kenney/survival/tool-hammer.glb", 0.5, Vector3(0.1, 0.35, 0), Vector3(0, 0, 0.6))
 		"Bird":
-			_model(root, "survival/campfire-pit.glb", 0.9)
+			_model(root, "kenney/survival/campfire-pit.glb", 0.9)
 			_cyl(root, 0.015, 0.015, 0.5, Color("#8a6a44"), Vector3(0, 0.45, 0))
 			_box(root, Vector3(0.5, 0.03, 0.12), Color("#c97a36"), Vector3(0, 0.72, 0))
 			_sphere(root, 0.07, Color("#d98a46"), Vector3(0, 0.74, 0))
@@ -50,15 +50,15 @@ static func build(object_name: String, size: Vector2) -> Node3D:
 			var cloth := _box(root, Vector3(size.x, 0.04, size.y), Color("#e6dcc4"), Vector3(0, 2.15, 0))
 			cloth.rotation.x = 0.08
 		"Exit", "Door":
-			_model(root, "survival/signpost-single.glb", 1.0)
+			_model(root, "kenney/survival/signpost-single.glb", 1.0)
 		"Cistern":
-			_box(root, Vector3(size.x, 1.1, size.y), Color("#8f8a82"), Vector3(0, 0.55, 0))
-			_box(root, Vector3(size.x - 0.4, 0.04, size.y - 0.4), Color("#2c4a5e"), Vector3(0, 1.11, 0))
+			_skin(_box(root, Vector3(size.x, 1.1, size.y), Color("#8f8a82"), Vector3(0, 0.55, 0)), "stone")
+			_box(root, Vector3(size.x - 0.4, 0.04, size.y - 0.4), Color("#2c4a5e"), Vector3(0, 1.11, 0)).material_override = Materials3D.water()
 		"Jars":
 			for i in 4:
-				_model(root, "nature/pot_large.glb", 0.62, Vector3((i - 1.5) * 0.66, 0, 0))
+				_model(root, "polypizza/pot_ceramic_large.glb", 0.6, Vector3((i - 1.5) * 0.66, 0, 0), Vector3(0, i * 1.3, 0))
 		"Gate":
-			_box(root, Vector3(maxf(size.x, 0.3), 2.2, size.y), Color("#6b4f33"), Vector3(0, 1.1, 0))
+			_skin(_box(root, Vector3(maxf(size.x, 0.3), 2.2, size.y), Color("#6b4f33"), Vector3(0, 1.1, 0)), "planks")
 			for z in [-0.35, 0.0, 0.35]:
 				_box(root, Vector3(maxf(size.x, 0.3) + 0.04, 0.12, 0.12), Color("#4a3424"), Vector3(0, 1.6, z * size.y))
 		"Refugees":
@@ -71,27 +71,30 @@ static func build(object_name: String, size: Vector2) -> Node3D:
 			var pipe := _cyl(root, 0.12, 0.12, size.x, Color("#b0704a"), Vector3(0, 0.12, 0))
 			pipe.rotation.z = PI / 2.0
 		"Spring":
-			_model(root, "nature/path_stoneCircle.glb", size.x + 0.4)
+			_model(root, "kenney/nature/path_stoneCircle.glb", size.x + 0.4)
 			_cyl(root, size.x * 0.32, size.x * 0.32, 0.03, Color("#2e5a70"), Vector3(0, 0.06, 0))
 		"Workbench":
-			_model(root, "survival/workbench-anvil.glb", 1.5)
+			_model(root, "kenney/survival/workbench-anvil.glb", 1.5)
 		"Hearth":
-			_model(root, "nature/campfire_stones.glb", size.x * 0.9)
+			_model(root, "kenney/nature/campfire_stones.glb", size.x * 0.9)
 		"Bag":
-			_model(root, "survival/chest.glb", 0.7)
+			_model(root, "kenney/survival/chest.glb", 0.7)
 		"CoolStone":
-			_model(root, "nature/rock_largeA.glb", size.x)
+			var boulder := _skin(_sphere(root, size.x * 0.5, Color.WHITE, Vector3(0, size.x * 0.2, 0)), "stone", Color(0.9, 0.82, 0.75))
 		"Shade":
-			_model(root, "nature/tree_plateau.glb", 2.6)
+			_model(root, "polypizza/acacia.glb", 4.2)
 		"WayStation":
-			_model(root, "nature/statue_block.glb", size.x)
-			_cyl(root, 0.25, 0.2, 0.08, Color("#b5afa5"), Vector3(size.x * 0.25, 1.0, 0))
+			# Carved stone: a gilded hand on one side, a worn bowl on the other.
+			_skin(_box(root, Vector3(size.x, 0.95, size.y), Color.WHITE, Vector3(0, 0.47, 0)), "stone")
+			for finger in 4:
+				_box(root, Vector3(0.05, 0.28, 0.03), Color("#d4af37"), Vector3(-size.x * 0.3 + finger * 0.07, 0.62, size.y / 2.0 + 0.01))
+			_skin(_cyl(root, 0.28, 0.2, 0.1, Color.WHITE, Vector3(size.x * 0.25, 1.0, 0)), "stone")
 		"Cart", "Carts":
 			_cart(root, size)
 		"Traveller":
-			_model(root, "survival/bedroll.glb", size.x)
+			_model(root, "kenney/survival/bedroll.glb", size.x)
 		"CulvertMouth":
-			_box(root, Vector3(size.x, 1.8, size.y), Color("#7d776e"), Vector3(0, 0.9, 0))
+			_skin(_box(root, Vector3(size.x, 1.8, size.y), Color("#7d776e"), Vector3(0, 0.9, 0)), "stone")
 			_box(root, Vector3(size.x * 0.55, 1.3, 0.1), Color("#151c22"), Vector3(0, 0.65, size.y / 2.0 + 0.01))
 		"Reflection":
 			var puddle := _cyl(root, size.x * 0.5, size.x * 0.5, 0.02, Color("#2c4a63"), Vector3(0, 0.02, 0))
@@ -104,14 +107,14 @@ static func build(object_name: String, size: Vector2) -> Node3D:
 			_box(root, Vector3(size.x, 0.6, 0.06), Color("#d9c7a0"), Vector3(0, 1.8, 0))
 			_box(root, Vector3(0.08, 1.8, 0.08), Color("#6b4f33"), Vector3(0, 0.9, 0.05))
 		"SideChannel":
-			_box(root, Vector3(size.x, 0.4, size.y), Color("#7d776e"), Vector3(0, 0.2, 0))
-			_box(root, Vector3(size.x, 0.02, size.y * 0.5), Color("#2e5a70"), Vector3(0, 0.41, 0))
+			_skin(_box(root, Vector3(size.x, 0.4, size.y), Color("#7d776e"), Vector3(0, 0.2, 0)), "stone")
+			_box(root, Vector3(size.x, 0.02, size.y * 0.5), Color("#2e5a70"), Vector3(0, 0.41, 0)).material_override = Materials3D.water()
 			var valve := _torus(root, 0.18, 0.24, Color("#c97a36"), Vector3(0, 0.75, 0))
 			valve.rotation.x = PI / 2.0
 		"Brace":
-			_model(root, "nature/log.glb", size.x)
+			_model(root, "kenney/nature/log.glb", size.x)
 		"SluiceLock":
-			_model(root, "survival/chest.glb", size.x)
+			_model(root, "kenney/survival/chest.glb", size.x)
 		"Grille":
 			_box(root, Vector3(size.x, 1.8, 0.2), Color("#1a1612"), Vector3(0, 0.9, 0.2))
 			for i in 7:
@@ -121,7 +124,7 @@ static func build(object_name: String, size: Vector2) -> Node3D:
 			eren.ready.connect(func() -> void: eren.play("fix"))
 			root.add_child(eren)
 		"Bypass":
-			_box(root, Vector3(size.x * 1.4, 0.4, 0.5), Color("#7d776e"), Vector3(0, 0.2, 0))
+			_skin(_box(root, Vector3(size.x * 1.4, 0.4, 0.5), Color("#7d776e"), Vector3(0, 0.2, 0)), "stone")
 			var wheel := _torus(root, 0.55, 0.7, Color("#b8692e"), Vector3(0, 0.95, 0))
 			wheel.rotation.x = PI / 2.0
 			for angle in [0.0, PI / 2.0, PI / 4.0, -PI / 4.0]:
@@ -136,14 +139,14 @@ static func build(object_name: String, size: Vector2) -> Node3D:
 static func wall(size: Vector2, stone: bool, height := 1.1) -> Node3D:
 	var root := Node3D.new()
 	var color := Color("#8f8576") if stone else Color("#a8714a")
-	_box(root, Vector3(size.x, height, size.y), color, Vector3(0, height / 2.0, 0))
-	_box(root, Vector3(size.x + 0.06, 0.08, size.y + 0.06), color.darkened(0.15), Vector3(0, height, 0))
+	_skin(_box(root, Vector3(size.x, height, size.y), color, Vector3(0, height / 2.0, 0)), "stone" if stone else "mud_brick")
+	_skin(_box(root, Vector3(size.x + 0.06, 0.08, size.y + 0.06), color.darkened(0.15), Vector3(0, height, 0)), "stone" if stone else "plaster", Color(0.85, 0.8, 0.75))
 	return root
 
 
 static func _house(root: Node3D, size: Vector2) -> void:
 	var wall_height := 2.4
-	_box(root, Vector3(size.x, wall_height, size.y), Color("#a8714a"), Vector3(0, wall_height / 2.0, 0))
+	_skin(_box(root, Vector3(size.x, wall_height, size.y), Color("#a8714a"), Vector3(0, wall_height / 2.0, 0)), "plaster", Color(1.0, 0.85, 0.72))
 	_box(root, Vector3(0.8, 1.7, 0.05), Color("#3a2618"), Vector3(0, 0.85, size.y / 2.0 + 0.02))
 	# Thatched roof: a four-sided cone over the walls.
 	var roof := _cyl(root, 0.0, maxf(size.x, size.y) * 0.78, 1.6, Color("#b89a5a"), Vector3(0, wall_height + 0.8, 0), 4)
@@ -151,8 +154,20 @@ static func _house(root: Node3D, size: Vector2) -> void:
 	roof.scale = Vector3(size.x / maxf(size.x, size.y), 1.0, size.y / maxf(size.x, size.y))
 
 
+## A round mud hut with a conical thatched roof, as in Zambian villages: plastered
+## walls, a low doorway, a thatch cone with a little overhang.
+static func round_hut(radius: float) -> Node3D:
+	var root := Node3D.new()
+	var wall_height := radius * 0.85
+	_skin(_cyl(root, radius, radius * 1.03, wall_height, Color.WHITE, Vector3(0, wall_height / 2.0, 0), 20), "plaster", Color(1.0, 0.86, 0.74))
+	_box(root, Vector3(radius * 0.45, wall_height * 0.75, 0.1), Color("#2a1a10"), Vector3(0, wall_height * 0.37, radius - 0.02))
+	var roof := _cyl(root, 0.02, radius * 1.32, radius * 1.05, Color.WHITE, Vector3(0, wall_height + radius * 0.5, 0), 20)
+	_skin(roof, "thatch")
+	return root
+
+
 static func _cart(root: Node3D, size: Vector2) -> void:
-	_box(root, Vector3(size.x, 0.5, size.y), Color("#8a6a44"), Vector3(0, 0.75, 0))
+	_skin(_box(root, Vector3(size.x, 0.5, size.y), Color("#8a6a44"), Vector3(0, 0.75, 0)), "planks")
 	for x: float in [-0.3, 0.3]:
 		var wheel := _cyl(root, 0.4, 0.4, 0.1, Color("#4a3424"), Vector3(x * size.x, 0.4, size.y / 2.0 + 0.06))
 		wheel.rotation.x = PI / 2.0
@@ -161,7 +176,7 @@ static func _cart(root: Node3D, size: Vector2) -> void:
 
 ## Loads a Kenney model and scales it so its footprint's longer side is `fit` metres.
 static func _model(root: Node3D, path: String, fit: float, offset := Vector3.ZERO, rotation := Vector3.ZERO) -> Node3D:
-	var packed := load(KENNEY + path) as PackedScene
+	var packed := load(THIRD_PARTY + path) as PackedScene
 	if packed == null:
 		push_error("Missing model: %s" % path)
 		return null
@@ -180,11 +195,11 @@ static func _model(root: Node3D, path: String, fit: float, offset := Vector3.ZER
 ## Kenney's Nature Kit colours its grass and leaves teal and marks every material as
 ## fully metallic. Recolour to dry-season savanna tones and make everything matte.
 const PALETTE := {
-	"grass": Color("#8a9a48"),
+	"grass": Color("#7a8240"),
 	"leafs": Color("#6f8a3e"),
 	"leafsDark": Color("#56703a"),
 	"leafsFall": Color("#b0903a"),
-	"dirt": Color("#a8603c"),
+	"dirt": Color("#6e4a36"),
 	"dirtDark": Color("#7a4a30"),
 }
 static var _restyled: Dictionary = {}
@@ -232,6 +247,12 @@ static func _relative_transform(child: Node3D, ancestor: Node) -> Transform3D:
 		transform = (node as Node3D).transform * transform
 		node = node.get_parent()
 	return transform
+
+
+## Gives a built-in shape a textured material from Materials3D.
+static func _skin(instance: MeshInstance3D, set_name: String, tint := Color.WHITE) -> MeshInstance3D:
+	instance.material_override = Materials3D.get_material(set_name, tint)
+	return instance
 
 
 static func _material(color: Color) -> StandardMaterial3D:

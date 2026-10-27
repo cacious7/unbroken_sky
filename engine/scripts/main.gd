@@ -47,6 +47,10 @@ func _ready() -> void:
 	if GameState.has_save():
 		column.add_child(_button("Continue", _continue))
 	column.add_child(_button("New game", _new_game))
+	var credits_button := _button("Credits", _show_credits)
+	credits_button.custom_minimum_size = Vector2(240, 44)
+	credits_button.add_theme_font_size_override("font_size", 18)
+	column.add_child(credits_button)
 	if OS.is_debug_build():
 		# Prototype rooms for testing on the phone; they use their own save.
 		var rooms := HBoxContainer.new()
@@ -67,6 +71,34 @@ func _button(text: String, action: Callable) -> Button:
 	button.add_theme_font_size_override("font_size", 22)
 	button.pressed.connect(action)
 	return button
+
+
+## Credits, including the attribution that CC-BY assets require.
+func _show_credits() -> void:
+	var overlay := ColorRect.new()
+	overlay.color = Color(0, 0, 0, 0.85)
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(overlay)
+	var scroll := ScrollContainer.new()
+	scroll.set_anchors_preset(Control.PRESET_FULL_RECT)
+	scroll.offset_left = 60
+	scroll.offset_right = -60
+	scroll.offset_top = 30
+	scroll.offset_bottom = -90
+	overlay.add_child(scroll)
+	var text := Label.new()
+	text.text = FileAccess.get_file_as_string("res://data/credits.txt")
+	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	text.custom_minimum_size = Vector2(700, 0)
+	text.add_theme_font_size_override("font_size", 17)
+	scroll.add_child(text)
+	var close := _button("Back", overlay.queue_free)
+	close.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	close.offset_left = -120
+	close.offset_right = 120
+	close.offset_top = -76
+	close.offset_bottom = -20
+	overlay.add_child(close)
 
 
 func _continue() -> void:

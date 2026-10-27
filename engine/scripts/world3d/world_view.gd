@@ -13,14 +13,14 @@ const CAMERA_OFFSET := Vector3(0, 9.0, 5.8)
 
 ## Lighting per scene (keyed by the scene's root node name).
 const MOODS := {
-	"WellYard": {"sky": "#7fa8d0", "horizon": "#f2cf98", "sun": Vector3(-38, -30, 0), "sun_color": "#ffe2b8", "energy": 1.15, "ambient": 0.55, "outdoor": true, "fog": 0.0},
-	"Cistern": {"sky": "#86b2d8", "horizon": "#f0d6a8", "sun": Vector3(-55, -20, 0), "sun_color": "#fff0d8", "energy": 1.2, "ambient": 0.55, "outdoor": true, "fog": 0.0},
+	"WellYard": {"hdri": "qwantani_dawn_puresky", "sky": "#7fa8d0", "horizon": "#f2cf98", "sun": Vector3(-38, -30, 0), "sun_color": "#ffe2b8", "energy": 1.15, "ambient": 0.55, "outdoor": true, "fog": 0.0},
+	"Cistern": {"hdri": "qwantani_noon_puresky", "sky": "#86b2d8", "horizon": "#f0d6a8", "sun": Vector3(-55, -20, 0), "sun_color": "#fff0d8", "energy": 1.2, "ambient": 0.55, "outdoor": true, "fog": 0.0},
 	"Home": {"sky": "#3a2a20", "horizon": "#6a4a30", "sun": Vector3(-62, 25, 0), "sun_color": "#ffd8a0", "energy": 0.9, "ambient": 0.7, "outdoor": false, "fog": 0.0},
-	"AshRoad": {"sky": "#a8c4dc", "horizon": "#f8e0b0", "sun": Vector3(-68, -10, 0), "sun_color": "#fff6e0", "energy": 1.35, "ambient": 0.5, "outdoor": true, "fog": 0.0},
-	"Culvert": {"sky": "#8a90b8", "horizon": "#f0a870", "sun": Vector3(-22, -55, 0), "sun_color": "#ffb878", "energy": 1.1, "ambient": 0.45, "outdoor": true, "fog": 0.004},
-	"ReedGate": {"sky": "#8a96a4", "horizon": "#c8c0b0", "sun": Vector3(-45, 30, 0), "sun_color": "#e8e4dc", "energy": 0.85, "ambient": 0.6, "outdoor": true, "fog": 0.0},
+	"AshRoad": {"hdri": "qwantani_noon_puresky", "sky": "#a8c4dc", "horizon": "#f8e0b0", "sun": Vector3(-68, -10, 0), "sun_color": "#fff6e0", "energy": 1.35, "ambient": 0.5, "outdoor": true, "fog": 0.0},
+	"Culvert": {"hdri": "mpumalanga_veld_puresky", "sky": "#8a90b8", "horizon": "#f0a870", "sun": Vector3(-22, -55, 0), "sun_color": "#ffb878", "energy": 1.1, "ambient": 0.45, "outdoor": true, "fog": 0.004},
+	"ReedGate": {"hdri": "qwantani_sunrise_puresky", "sky": "#8a96a4", "horizon": "#c8c0b0", "sun": Vector3(-45, 30, 0), "sun_color": "#e8e4dc", "energy": 0.85, "ambient": 0.6, "outdoor": true, "fog": 0.0},
 	"KeeperRoom": {"sky": "#141a20", "horizon": "#26303a", "sun": Vector3(-70, 10, 0), "sun_color": "#a8c0d8", "energy": 0.55, "ambient": 0.35, "outdoor": false, "fog": 0.0},
-	"WheelPlatform": {"sky": "#5a6a9a", "horizon": "#e89a68", "sun": Vector3(-20, 40, 0), "sun_color": "#ffb080", "energy": 1.0, "ambient": 0.5, "outdoor": true, "fog": 0.0},
+	"WheelPlatform": {"hdri": "mpumalanga_veld_puresky", "sky": "#5a6a9a", "horizon": "#e89a68", "sun": Vector3(-20, 40, 0), "sun_color": "#ffb080", "energy": 1.0, "ambient": 0.5, "outdoor": true, "fog": 0.0},
 }
 
 var scene: StoryScene
@@ -58,8 +58,9 @@ func _ready() -> void:
 	_build_environment(mood)
 	for child in scene.get_children():
 		_build_object(child)
-	if mood.outdoor:
+	if String(scene.name) in ["WellYard", "Cistern", "AshRoad", "Culvert"]:
 		_scatter_nature()
+	_dress_surroundings()
 	_build_player()
 	_build_focus_ring()
 	camera = Camera3D.new()
@@ -121,28 +122,31 @@ func _register_if_tall(node: Node3D) -> void:
 func _build_environment(mood: Dictionary) -> void:
 	var environment := Environment.new()
 	if mood.outdoor:
-		var sky_material := ProceduralSkyMaterial.new()
-		sky_material.sky_top_color = Color(mood.sky)
-		sky_material.sky_horizon_color = Color(mood.horizon)
-		sky_material.ground_horizon_color = Color(mood.horizon).darkened(0.2)
-		sky_material.ground_bottom_color = Color(mood.horizon).darkened(0.5)
+		# A real photographed sky (Poly Haven HDRI, mostly shot in South Africa) both
+		# shows above the horizon and lights the scene with its true colours.
+		var sky_material := PanoramaSkyMaterial.new()
+		sky_material.panorama = load("res://assets/third_party/polyhaven/hdri/%s_1k.hdr" % mood.hdri)
 		var sky := Sky.new()
 		sky.sky_material = sky_material
 		environment.background_mode = Environment.BG_SKY
 		environment.sky = sky
-		# A warm, neutral fill rather than the blue sky: sky ambient tints every upward
-		# face blue (green plants turn cyan, warm earth turns white).
-		environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-		environment.ambient_light_color = Color(mood.horizon).lerp(Color("#9a9080"), 0.5)
+		environment.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+		environment.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
+		environment.ambient_light_energy = mood.ambient * 0.9
 	else:
 		environment.background_mode = Environment.BG_COLOR
 		environment.background_color = Color(mood.sky)
 		environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 		environment.ambient_light_color = Color(mood.horizon).lightened(0.4)
-	# Kept well below 1: bright sky ambient plus sun washes the warm ground out to white.
-	environment.ambient_light_energy = mood.ambient * 0.45
-	environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	environment.tonemap_exposure = 0.85
+		environment.ambient_light_energy = mood.ambient * 0.45
+	environment.tonemap_mode = Environment.TONE_MAPPER_AGX
+	environment.tonemap_exposure = 1.0
+	environment.glow_enabled = true
+	environment.glow_intensity = 0.3
+	environment.glow_bloom = 0.05
+	environment.adjustment_enabled = true
+	environment.adjustment_saturation = 1.1
+	environment.adjustment_contrast = 1.05
 	if mood.fog > 0.0:
 		environment.fog_enabled = true
 		environment.fog_light_color = Color(mood.horizon)
@@ -153,8 +157,9 @@ func _build_environment(mood: Dictionary) -> void:
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = mood.sun
 	sun.light_color = Color(mood.sun_color)
-	sun.light_energy = mood.energy * 0.7
+	sun.light_energy = mood.energy * 0.9
 	sun.shadow_enabled = true
+	sun.shadow_blur = 1.5
 	sun.directional_shadow_max_distance = 40.0
 	add_child(sun)
 
@@ -197,10 +202,7 @@ func _build_surface(rect: ColorRect) -> void:
 	mesh.size = Vector3(size.x, 0.1, size.y)
 	var instance := MeshInstance3D.new()
 	instance.mesh = mesh
-	var material := StandardMaterial3D.new()
-	material.albedo_color = rect.color
-	material.roughness = 0.25 if rect.color.b > rect.color.r else 0.95
-	instance.material_override = material
+	instance.material_override = Materials3D.for_surface(String(scene.name), String(rect.name), rect.color)
 	instance.position = center + Vector3(0, layer, 0)
 	add_child(instance)
 
@@ -297,6 +299,66 @@ func _build_focus_ring() -> void:
 	add_child(_focus_ring)
 
 
+## What lies around each scene, mostly beyond its walls: Red Hollow's round thatched
+## huts and baobab, chickens and goats in the yard, a donkey on the road, reeds and
+## boats in the river world. (CC0 Quaternius animals; CC-BY huts, trees and reeds are
+## credited in ASSET_REGISTER.md.)
+func _dress_surroundings() -> void:
+	match String(scene.name):
+		"WellYard", "Cistern":
+			# Red Hollow: round thatched huts beyond the compound walls.
+			for spot: Array in [[-2.5, -3.0, 2.0], [5.0, -4.5, 2.3], [12.0, -3.5, 1.8], [19.5, -4.2, 2.2],
+					[27.0, -2.0, 2.0], [-3.5, 6.0, 1.8], [27.5, 9.0, 2.1], [8.5, -8.0, 1.6], [16.0, -9.0, 2.0]]:
+				var hut := Props3D.round_hut(spot[2])
+				hut.position = Vector3(spot[0], 0, spot[1])
+				hut.rotation.y = atan2(ROOM.x / 2.0 - spot[0], ROOM.y / 2.0 - spot[1])
+				add_child(hut)
+			_place("polypizza/baobab.glb", Vector3(-6.0, 0, -6.0), 7.0)
+			for i in 3:
+				_animal("polypizza/chicken.glb", "Idle_Peck", Vector3(14.0 + i * 1.3, 0, 10.5 - i * 0.8), 0.45, i * 1.7)
+			if String(scene.name) == "Cistern":
+				_animal("polypizza/donkey.glb", "Eating", Vector3(25.5, 0, 3.0), 1.9, -1.2)
+		"AshRoad":
+			_place("polypizza/acacia.glb", Vector3(4.0, 0, -3.5), 6.0)
+			_place("polypizza/acacia.glb", Vector3(17.0, 0, -4.0), 7.0, 1.3)
+			_place("polypizza/savanna_tree.glb", Vector3(26.5, 0, 6.0), 4.0)
+			_animal("polypizza/donkey.glb", "Eating", Vector3(19.5, 0, 11.2), 1.9, 0.4)
+			_place("polypizza/cart_broken.glb", Vector3(10.5, 0, 12.6), 2.2, 0.3)
+		"Culvert":
+			_place("polypizza/acacia.glb", Vector3(-3.0, 0, 2.0), 6.0)
+			_place("polypizza/savanna_tree.glb", Vector3(27.0, 0, 10.0), 4.0, 2.0)
+		"ReedGate":
+			for i in 9:
+				_place("polypizza/cattail.glb", Vector3(1.5 + i * 2.6, 0, 2.6 + (i % 2) * 0.4), 1.1, i * 0.8)
+			_place("polypizza/boat.glb", Vector3(15.0, 0.05, 1.2), 3.0, 0.3)
+			_place("polypizza/stone_wall_towers.glb", Vector3(12.0, 0, -6.0), 22.0)
+		"WheelPlatform":
+			_place("polypizza/canoe.glb", Vector3(-1.5, 0.05, 6.0), 3.5, 1.4)
+			_place("polypizza/dock_wide.glb", Vector3(24.2, 0, 10.5), 3.0, PI / 2.0)
+			for i in 6:
+				_place("polypizza/cattail.glb", Vector3(0.6, 0, 1.0 + i * 2.2), 1.2, i)
+
+
+func _place(path: String, at: Vector3, fit: float, turn := 0.0) -> Node3D:
+	var holder := Node3D.new()
+	holder.position = at
+	holder.rotation.y = turn
+	add_child(holder)
+	Props3D._model(holder, path, fit)
+	return holder
+
+
+func _animal(path: String, clip_suffix: String, at: Vector3, fit: float, turn := 0.0) -> void:
+	var holder := _place(path, at, fit, turn)
+	for player: AnimationPlayer in holder.find_children("", "AnimationPlayer", true, false):
+		for clip in player.get_animation_list():
+			if clip.ends_with(clip_suffix):
+				player.get_animation(clip).loop_mode = Animation.LOOP_LINEAR
+				player.play(clip)
+				player.seek(randf() * 2.0)
+				break
+
+
 ## Grass, bushes, rocks and a few acacias on open ground, clear of walls, objects and
 ## the spaces people walk through.
 func _scatter_nature() -> void:
@@ -309,12 +371,12 @@ func _scatter_nature() -> void:
 		if child is Interactable or child is Husk or child is WaterRope:
 			blocked.append(Rect2(child.global_position - Vector2(70, 70), Vector2(140, 140)))
 	blocked.append(Rect2(scene.player.global_position - Vector2(80, 80), Vector2(160, 160)))
-	var small := ["nature/grass.glb", "nature/grass_large.glb", "nature/grass_leafs.glb", "nature/plant_bushSmall.glb",
-			"nature/rock_smallA.glb", "nature/rock_smallB.glb", "nature/rock_smallFlatA.glb", "nature/plant_flatShort.glb",
-			"survival/rock-sand-a.glb", "survival/rock-sand-b.glb"]
+	# Mostly dry grass and low bushes; just a few small stones.
+	var small := ["kenney/nature/grass.glb", "kenney/nature/grass_large.glb", "kenney/nature/grass_leafs.glb", "kenney/nature/plant_bushSmall.glb",
+			"kenney/nature/grass_large.glb", "kenney/nature/plant_flatShort.glb", "kenney/nature/grass.glb", "kenney/nature/rock_smallFlatA.glb"]
 	var placed := 0
 	var attempts := 0
-	while placed < 46 and attempts < 600:
+	while placed < 30 and attempts < 600:
 		attempts += 1
 		var point := Vector2(rng.randf_range(40, 920), rng.randf_range(40, 500))
 		if blocked.any(func(rect: Rect2) -> bool: return rect.has_point(point)):
@@ -335,7 +397,7 @@ func _scatter_nature() -> void:
 		var tree := Node3D.new()
 		tree.position = to_3d(spot)
 		add_child(tree)
-		Props3D._model(tree, "nature/tree_plateau.glb", rng.randf_range(2.4, 3.2))
+		Props3D._model(tree, "polypizza/savanna_tree.glb", rng.randf_range(3.0, 4.0))
 
 
 # --- Following the gameplay -------------------------------------------------------

@@ -14,4 +14,19 @@ Every file under `assets/` is listed here with its source, licence and any modif
 | `art/eagle.svg` | Original | Project-owned | Colouring follows the African fish eagle, Zambia's national bird (R01). Not a copy of any existing illustration. |
 | `sfx/*.wav` | Synthesised by `tools/generate_sounds.gd` | Project-owned | Generated from sine waves and filtered noise; rerun the tool to regenerate. |
 
-Nothing third-party has been imported yet. Before importing any outside asset (asset packs, commissioned art, AI-generated images, recorded sound or music), add a row with its source URL or creator, licence, credit wording and any changes made.
+## Third-party assets (`assets/third_party/`)
+
+| Folder / file | Source | Licence | Credit required | Notes |
+| --- | --- | --- | --- | --- |
+| `quaternius_ual/ual_standard.glb` | Universal Animation Library (Standard) by Quaternius, opengameart.org/content/universal-animation-library | CC0 | No (credited anyway) | Mannequin + 45 animations; the whole cast is built on it. Licence file included. |
+| `kenney/nature/`, `kenney/survival/`, `kenney/furniture/` | Kenney Nature Kit 2.1, Survival Kit, Furniture Kit, kenney.nl | CC0 | No (credited anyway) | Curated subsets. Colours restyled at load (teal grass → savanna olive, metallic off). Licence files included. |
+| `polyhaven/textures/*` | Poly Haven, polyhaven.com: red_laterite_soil_stones, cracked_red_ground, dry_ground_01, clay_block_wall, clay_plaster, thatch_roof_angled, old_stone_wall, mossy_stone_wall, weathered_planks (1k) | CC0 | No (credited anyway) | Colour, normal (GL) and AO/roughness/metal maps. |
+| `polyhaven/hdri/*` | Poly Haven skies: qwantani_dawn/noon/sunrise_puresky, mpumalanga_veld_puresky (1k) | CC0 | No | Scene skies and sky lighting. |
+| `polypizza/chicken, cow, donkey, well, boat, cart, cart_broken, pot, lever, stone_wall_towers, dock_wide` | Quaternius via Poly Pizza | CC0 | No | Animals are animated. |
+| `polypizza/pot_ceramic_large, pot_medium, savanna_tree` | MilkAndBanana / Isa Lousberg / hat_my_guy via Poly Pizza | CC0 | No | |
+| `polypizza/acacia.glb` | "Acacia" by Poly by Google, poly.pizza/m/0j86RMO4kQC | CC-BY 3.0 | **Yes** | In `data/credits.txt` (title screen → Credits). |
+| `polypizza/baobab.glb` | "Boab" by Poly by Google, poly.pizza/m/8Tmb--j8Fwo | CC-BY 3.0 | **Yes** | In credits. |
+| `polypizza/cattail.glb` | "Cattail" by Poly by Google, poly.pizza/m/0n3rRfj47hu | CC-BY 3.0 | **Yes** | In credits. |
+| `polypizza/canoe.glb` | "Canoe" by Poly by Google, poly.pizza/m/0ciipfLS8Nf | CC-BY 3.0 | **Yes** | In credits. |
+
+Rule: any CC-BY asset must appear in `data/credits.txt`. Assets with NC (non-commercial), ND (no derivatives) or unclear authorship are not used. A goat model was removed because its author could not be confirmed. Before importing any outside asset (asset packs, commissioned art, AI-generated images, recorded sound or music), add a row with its source URL or creator, licence, credit wording and any changes made.

@@ -1,0 +1,22 @@
+THE UNBROKEN SKY
+Chapter One
+
+Story, design and development: Cacious Siamunyanga
+Published by Mulawo
+
+Made with Godot Engine (godotengine.org), MIT licence.
+
+3D MODELS AND TEXTURES
+Characters' animations and body: Universal Animation Library by Quaternius (CC0)
+Animals, well, carts, pots, boats, docks: Quaternius and others via Poly Pizza (CC0)
+Nature, survival and furniture models: Kenney (www.kenney.nl) (CC0)
+Ground, wall, thatch, stone and wood textures; skies: Poly Haven (polyhaven.com) (CC0)
+
+Licensed under Creative Commons Attribution 3.0:
+"Acacia" by Poly by Google, via Poly Pizza (https://poly.pizza/m/0j86RMO4kQC)
+"Boab" by Poly by Google, via Poly Pizza (https://poly.pizza/m/8Tmb--j8Fwo)
+"Cattail" by Poly by Google, via Poly Pizza (https://poly.pizza/m/0n3rRfj47hu)
+"Canoe" by Poly by Google, via Poly Pizza (https://poly.pizza/m/0ciipfLS8Nf)
+https://creativecommons.org/licenses/by/3.0/
+
+Thank you for playing.
