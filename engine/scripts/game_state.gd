@@ -7,6 +7,7 @@ signal changed(key: String, value: Variant)
 const SAVE_VERSION := 1
 
 const SCENES := {
+	"SC01": "res://scenes/prologue.tscn",
 	"SC02": "res://scenes/well_yard.tscn",
 	"SC03": "res://scenes/cistern.tscn",
 	"SC04": "res://scenes/home.tscn",
@@ -24,7 +25,7 @@ const TEST_ROOM_SAVE_PATH := "user://test_room_save.json"
 ## Story state from Game Concept/development/CHOICES_AND_STATE.md plus per-scene progress.
 ## "" means a policy has not been chosen yet.
 const DEFAULTS := {
-	"scene_id": "SC02",
+	"scene_id": "SC01",
 	"water_policy": "",
 	"water_compact": false,
 	"eagle_unlocked": false,
@@ -68,7 +69,7 @@ const DEFAULTS := {
 
 ## Legal values for string fields; anything else in a save resets to the default.
 const ALLOWED := {
-	"scene_id": ["SC02", "SC03", "SC04", "SC05", "SC06", "SC07", "SC08", "SC09", "SC10"],
+	"scene_id": ["SC01", "SC02", "SC03", "SC04", "SC05", "SC06", "SC07", "SC08", "SC09", "SC10"],
 	"water_policy": ["", "reserve", "share", "joint"],
 }
 

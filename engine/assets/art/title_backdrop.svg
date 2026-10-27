@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="960" height="540">
+  <!-- Title backdrop: dawn over a dry upland (Red Hollow side) falling to a river world.
+       Original illustration. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#16243a"/>
+      <stop offset="0.45" stop-color="#5a3a4a"/>
+      <stop offset="0.75" stop-color="#c0703a"/>
+      <stop offset="1" stop-color="#eab062"/>
+    </linearGradient>
+    <linearGradient id="river" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7aa6be"/>
+      <stop offset="1" stop-color="#2c4a63"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" fill="url(#sky)"/>
+  <!-- a few last stars -->
+  <g fill="#f4ead0" opacity="0.7"><circle cx="90" cy="60" r="1.6"/><circle cx="240" cy="40" r="1.2"/><circle cx="420" cy="70" r="1.4"/><circle cx="780" cy="50" r="1.6"/><circle cx="880" cy="110" r="1.2"/><circle cx="640" cy="30" r="1.2"/></g>
+  <!-- the sun rising -->
+  <circle cx="700" cy="360" r="70" fill="#f6d68c" opacity="0.95"/>
+  <circle cx="700" cy="360" r="110" fill="#f6d68c" opacity="0.18"/>
+  <!-- far hills -->
+  <path d="M0 340 Q120 290 240 320 Q360 280 480 310 Q600 270 720 300 Q840 280 960 310 L960 540 L0 540 Z" fill="#6a3f3a"/>
+  <!-- the river world below, catching the light -->
+  <path d="M0 420 Q240 390 480 410 Q720 430 960 400 L960 540 L0 540 Z" fill="#3e3236"/>
+  <path d="M380 540 Q470 470 600 440 Q760 410 960 418 L960 446 Q770 444 640 468 Q520 494 470 540 Z" fill="url(#river)"/>
+  <!-- the dry upland in front: red earth, a homestead, acacias -->
+  <path d="M0 360 Q140 340 260 372 Q330 392 360 440 L380 540 L0 540 Z" fill="#8a4a2c"/>
+  <path d="M0 410 Q120 396 230 418 Q300 432 330 470" fill="none" stroke="#a65c36" stroke-width="3"/>
+  <g transform="translate(150 330)">
+    <rect x="0" y="16" width="56" height="26" fill="#3a2418"/>
+    <path d="M-8 18 L8 0 L48 0 L64 18 Z" fill="#2a1a12"/>
+  </g>
+  <g fill="#24170f">
+    <path d="M60 350 L62 318 M62 330 L48 318 M62 326 L76 314" stroke="#24170f" stroke-width="3"/>
+    <path d="M24 318 Q40 304 62 306 Q86 304 100 318 Q80 326 62 324 Q42 326 24 318 Z"/>
+    <path d="M300 400 L302 360 M302 374 L284 360 M302 370 L320 356" stroke="#24170f" stroke-width="3.5"/>
+    <path d="M256 360 Q276 342 302 344 Q330 342 348 360 Q324 370 302 368 Q278 370 256 360 Z"/>
+  </g>
+  <!-- the eagle, high and free -->
+  <g transform="translate(600 205) rotate(-8) scale(0.85)" fill="#1a120d">
+    <path d="M0 0 Q-40 -34 -96 -40 Q-70 -24 -66 -10 Q-84 -14 -100 -10 Q-56 2 -14 10 Z"/>
+    <path d="M0 0 Q40 -34 96 -40 Q70 -24 66 -10 Q84 -14 100 -10 Q56 2 14 10 Z"/>
+    <ellipse cx="0" cy="6" rx="10" ry="18"/>
+    <circle cx="0" cy="-12" r="8" fill="#f4f1ea"/>
+  </g>
+</svg>

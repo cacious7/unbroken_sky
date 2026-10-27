@@ -16,6 +16,8 @@ func _init() -> void:
 	_save("whisper_present", _whisper())
 	_save("water_sweep", _sweep())
 	_save("pump_squeak", _squeak())
+	_save("metal_scrape", _scrape())
+	_save("door_open", _door())
 	quit()
 
 
@@ -103,6 +105,38 @@ func _sweep() -> PackedFloat32Array:
 		var shape := sin(PI * t / 0.6)
 		low += (0.03 + 0.25 * shape) * (_rng.randf_range(-1.0, 1.0) - low)
 		samples[i] = low * shape
+	return samples
+
+
+## SC01: metal dragged over stone in the dark, three slow strokes.
+func _scrape() -> PackedFloat32Array:
+	var samples := _buffer(2.4)
+	var low := 0.0
+	var high := 0.0
+	for i in samples.size():
+		var t := float(i) / RATE
+		var stroke := maxf(sin(PI * fmod(t, 0.8) / 0.8), 0.0)
+		var noise := _rng.randf_range(-1.0, 1.0)
+		low += 0.4 * (noise - low)
+		high += 0.08 * (noise - high)
+		var grit := 0.6 + 0.4 * sin(TAU * 47.0 * t) * (1.0 if _rng.randf() < 0.7 else -1.0)
+		samples[i] = (low - high) * stroke * grit * 0.8
+	return samples
+
+
+## SC01: a heavy door on old hinges, low and short.
+func _door() -> PackedFloat32Array:
+	var samples := _buffer(1.0)
+	var phase := 0.0
+	var smoothed := 0.0
+	for i in samples.size():
+		var t := float(i) / RATE
+		var pitch := lerpf(55.0, 38.0, t) + _rng.randf_range(-6.0, 6.0)
+		phase = fmod(phase + pitch / RATE, 1.0)
+		var grain := 1.0 if _rng.randf() < 0.5 else 0.15
+		smoothed += 0.15 * ((phase * 2.0 - 1.0) * grain - smoothed)
+		var thud := sin(TAU * 60.0 * t) * exp(-12.0 * maxf(t - 0.85, 0.0)) * (1.0 if t > 0.85 else 0.0)
+		samples[i] = smoothed * sin(PI * minf(t / 0.85, 1.0)) + thud * 0.8
 	return samples
 
 

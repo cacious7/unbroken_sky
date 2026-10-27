@@ -1,33 +1,47 @@
 extends Control
-## Title screen: continue a saved game or start a new one.
+## Title screen over the dawn backdrop: continue a saved game or start a new one.
 
 
 func _ready() -> void:
 	var background := ColorRect.new()
-	background.color = Color(0.1, 0.07, 0.05)
+	background.color = Color(0.09, 0.14, 0.23)
 	background.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(background)
-
-	var column := VBoxContainer.new()
-	column.set_anchors_preset(Control.PRESET_CENTER)
-	column.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	column.grow_vertical = Control.GROW_DIRECTION_BOTH
-	column.alignment = BoxContainer.ALIGNMENT_CENTER
-	column.add_theme_constant_override("separation", 14)
-	add_child(column)
+	var backdrop := TextureRect.new()
+	backdrop.texture = preload("res://assets/art/title_backdrop.svg")
+	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
+	backdrop.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	backdrop.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	add_child(backdrop)
 
 	var title := Label.new()
 	title.text = "The Unbroken Sky"
-	title.add_theme_font_size_override("font_size", 44)
-	title.add_theme_color_override("font_color", Color(0.95, 0.75, 0.35))
+	title.add_theme_font_size_override("font_size", 52)
+	title.add_theme_color_override("font_color", Color(0.98, 0.86, 0.55))
+	title.add_theme_color_override("font_outline_color", Color(0.08, 0.06, 0.1))
+	title.add_theme_constant_override("outline_size", 10)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	column.add_child(title)
-
+	title.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	title.offset_top = 36
+	add_child(title)
 	var subtitle := Label.new()
-	subtitle.text = "Chapter One · prototype"
-	subtitle.add_theme_font_size_override("font_size", 18)
+	subtitle.text = "Chapter One"
+	subtitle.add_theme_font_size_override("font_size", 20)
+	subtitle.add_theme_color_override("font_outline_color", Color(0.08, 0.06, 0.1))
+	subtitle.add_theme_constant_override("outline_size", 6)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	column.add_child(subtitle)
+	subtitle.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	subtitle.offset_top = 104
+	add_child(subtitle)
+
+	# Buttons sit over the dark upland at the bottom left, clear of the eagle and sun.
+	var column := VBoxContainer.new()
+	column.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	column.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	column.offset_left = 48
+	column.offset_bottom = -36
+	column.add_theme_constant_override("separation", 12)
+	add_child(column)
 
 	GameState.use_story_save()
 	if GameState.has_save():

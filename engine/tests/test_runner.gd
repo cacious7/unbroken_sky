@@ -3,6 +3,7 @@ extends Node
 ##   godot --headless --path . res://tests/test_runner.tscn
 ## Exits with code 0 when everything passes.
 
+const PROLOGUE := preload("res://scenes/prologue.tscn")
 const WELL_YARD := preload("res://scenes/well_yard.tscn")
 const CISTERN := preload("res://scenes/cistern.tscn")
 const HOME := preload("res://scenes/home.tscn")
@@ -14,6 +15,7 @@ const KEEPER_ROOM := preload("res://scenes/keeper_room.tscn")
 const WHEEL_PLATFORM := preload("res://scenes/wheel_platform.tscn")
 ## Each scene script with the dialogue file it plays.
 const SCENE_DIALOGUE := {
+	"res://scripts/prologue.gd": "res://data/dialogue/sc01.json",
 	"res://scripts/well_yard.gd": "res://data/dialogue/sc02.json",
 	"res://scripts/cistern.gd": "res://data/dialogue/sc03.json",
 	"res://scripts/home.gd": "res://data/dialogue/sc04.json",
@@ -36,6 +38,8 @@ func _ready() -> void:
 	_test_art_catalog()
 	_test_save_recovery()
 	_test_settings()
+	await _test_portraits()
+	await _test_prologue()
 	await _test_sc02_sequence()
 	await _test_sc02_resume()
 	await _test_tap_to_walk()
@@ -145,7 +149,7 @@ func _test_save_recovery() -> void:
 			"out-of-range pump count is clamped and kept consistent")
 	_write_save('{"version": 1, "flags": {"water_policy": "steal", "scene_id": "SC99"}}')
 	GameState.load_game()
-	_check(GameState.get_flag("water_policy") == "" and GameState.get_flag("scene_id") == "SC02",
+	_check(GameState.get_flag("water_policy") == "" and GameState.get_flag("scene_id") == "SC01",
 			"illegal water policy or scene id resets safely")
 	GameState.new_game()
 	GameState.set_flag("sc02_pin_collected", true)
@@ -201,6 +205,44 @@ func _close(scene: Node) -> void:
 	await _settle()
 
 
+# --- Portraits and SC01 -------------------------------------------------------
+
+func _test_portraits() -> void:
+	var box := DialogueBox.new()
+	add_child(box)
+	await _settle()
+	var mera := box.portrait_for("MERA")
+	_check(mera != null and mera.get_width() >= 90.0, "portraits: Mera's portrait is cut from her sprite at high resolution")
+	_check(box.portrait_for("WHISPER") == null and box.portrait_for("") == null,
+			"portraits: voices without a sprite show no portrait")
+	box.queue_free()
+	await _settle()
+
+
+func _spawn_prologue(instant := true) -> Node:
+	var prologue := PROLOGUE.instantiate()
+	prologue.instant = instant
+	prologue.get_node("Dialogue").auto_finish = true
+	add_child(prologue)
+	await _settle()
+	return prologue
+
+
+func _test_prologue() -> void:
+	GameState.new_game()
+	_check(GameState.get_flag("scene_id") == "SC01", "a new game starts with the SC01 prologue")
+	var prologue := await _spawn_prologue()
+	_check(GameState.get_flag("scene_id") == "SC02", "SC01: the prologue plays through to SC02")
+	await _close(prologue)
+
+	GameState.new_game()
+	var skipped := await _spawn_prologue(false)
+	skipped._finish()
+	skipped._finish()
+	_check(GameState.get_flag("scene_id") == "SC02", "SC01: Skip goes straight to SC02 (once)")
+	await _close(skipped)
+
+
 # --- SC02 ---------------------------------------------------------------------
 
 func _test_sc02_sequence() -> void:
@@ -212,7 +254,7 @@ func _test_sc02_sequence() -> void:
 	await _use(yard, "Pump")
 	_check(not GameState.get_flag("sc02_pump_repaired"), "pump cannot be repaired without the pin")
 	await _use(yard, "Exit")
-	_check(GameState.get_flag("scene_id") == "SC02", "exit is locked before the reveal")
+	_check(GameState.get_flag("scene_id") != "SC03", "exit is locked before the reveal")
 
 	await _use(yard, "Basket")
 	await _use(yard, "Basket")
@@ -587,6 +629,9 @@ func _test_full_chapter() -> void:
 		guard += 1
 		var scene_id: String = GameState.get_flag("scene_id")
 		visited.append(scene_id)
+		if scene_id == "SC01":
+			await _close(await _spawn_prologue())
+			continue
 		var scene := await _spawn(load(GameState.SCENES[scene_id]), ["c1_joint"])
 		match scene_id:
 			"SC02":
@@ -631,7 +676,7 @@ func _test_full_chapter() -> void:
 			"SC10":
 				await _use(scene, "Bypass")
 		await _close(scene)
-	_check(visited == ["SC02", "SC03", "SC04", "SC05", "SC06", "SC07", "SC08", "SC09", "SC10"],
+	_check(visited == ["SC01", "SC02", "SC03", "SC04", "SC05", "SC06", "SC07", "SC08", "SC09", "SC10"],
 			"full chapter: every scene hands over to the next in order %s" % [visited])
 	_check(GameState.get_flag("sc10_complete") and GameState.get_flag("water_policy") == "joint"
 			and GameState.get_flag("water_compact") and GameState.get_flag("eagle_unlocked")

@@ -1,0 +1,11 @@
+{
+  "scene_id": "SC01",
+  "source": "Game Concept/narrative/FINAL_SCRIPT.md, SC01.",
+  "conversations": {
+    "children": [
+      {"id": "sc01_children_01", "speaker": "CHILD ONE", "text": "Is there sky where you are?"},
+      {"id": "sc01_children_02", "speaker": "CHILD TWO", "text": "I don't know."},
+      {"id": "sc01_children_03", "speaker": "CHILD ONE", "text": "There must be. Birds don't carry it with them."}
+    ]
+  }
+}

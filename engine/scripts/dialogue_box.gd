@@ -22,6 +22,10 @@ var _speaker: Label
 var _text: Label
 var _hint: Label
 var _choices: VBoxContainer
+var _portrait: TextureRect
+var _portrait_frame: PanelContainer
+## Speaker name (upper case) -> portrait texture, or null when there is no sprite.
+var _portraits: Dictionary = {}
 
 
 func _ready() -> void:
@@ -99,6 +103,9 @@ func _show_line(line: Dictionary) -> void:
 	var caption: String = line.get("caption", "")
 	_speaker.text = speaker
 	_speaker.visible = speaker != ""
+	var portrait := portrait_for(speaker)
+	_portrait.texture = portrait
+	_portrait_frame.visible = portrait != null
 	_text.text = (caption + "\n" if caption != "" else "") + str(line.get("text", ""))
 	# Narration (no speaker) is set apart from spoken lines by colour.
 	_text.add_theme_color_override("font_color",
@@ -120,6 +127,24 @@ func _show_line(line: Dictionary) -> void:
 		for choice: Dictionary in choices:
 			_choices.add_child(_choice_button(choice))
 		_choices.get_child(0).grab_focus.call_deferred()
+
+
+## The speaker's head, cut from their character sprite (assets/art/characters/<name>.svg,
+## imported at 3x so the close-up stays sharp). Null for voices without a sprite.
+func portrait_for(speaker: String) -> Texture2D:
+	if speaker == "":
+		return null
+	if not _portraits.has(speaker):
+		var path := "res://assets/art/characters/%s.svg" % speaker.to_lower()
+		var portrait: AtlasTexture = null
+		if ResourceLoader.exists(path):
+			var sprite: Texture2D = load(path)
+			var scale := sprite.get_width() / 64.0
+			portrait = AtlasTexture.new()
+			portrait.atlas = sprite
+			portrait.region = Rect2(Vector2(12, 0) * scale, Vector2(40, 40) * scale)
+		_portraits[speaker] = portrait
+	return _portraits[speaker]
 
 
 func _choice_button(choice: Dictionary) -> Button:
@@ -203,9 +228,32 @@ func _build() -> void:
 	panel.offset_bottom = -16
 	catcher.add_child(panel)
 
+	var row := HBoxContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_theme_constant_override("separation", 14)
+	panel.add_child(row)
+
+	var frame_style := StyleBoxFlat.new()
+	frame_style.bg_color = Color(0.85, 0.72, 0.5)
+	frame_style.set_corner_radius_all(6)
+	frame_style.set_content_margin_all(3)
+	_portrait_frame = PanelContainer.new()
+	_portrait_frame.add_theme_stylebox_override("panel", frame_style)
+	_portrait_frame.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	_portrait_frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_portrait_frame.visible = false
+	row.add_child(_portrait_frame)
+	_portrait = TextureRect.new()
+	_portrait.custom_minimum_size = Vector2(84, 84)
+	_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_portrait_frame.add_child(_portrait)
+
 	var column := VBoxContainer.new()
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.add_child(column)
+	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(column)
 
 	_speaker = Label.new()
 	_speaker.add_theme_color_override("font_color", Color(0.95, 0.75, 0.35))

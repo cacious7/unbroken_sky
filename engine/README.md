@@ -84,3 +84,10 @@ Controls (all work together; any direct movement cancels a tap-walk):
 - App icon: `assets/icon.svg`.
 - Verified: 119 headless checks pass (adds art catalog and sound-name checks). Visual review of all nine scenes via `tests/tour.tscn`.
 - Next: phone check of the art at real size; SC01 prologue; title screen art; portraits for dialogue.
+
+### 27 October 2026: session 1, continued (prologue, title, portraits)
+
+- SC01 prologue (`prologue.tscn`): darkness, scraping metal, two children's hands either side of the copper channel, the moving line of daylight, three lines, the sleeve (in Mera's colour, unstated), the door, hard cut, "SEVENTEEN YEARS LATER. RED HOLLOW." Captions for both sounds; Skip button. New games now start here.
+- Title screen: original dawn backdrop with the eagle, outlined title.
+- Dialogue portraits: the speaker's head is cut from their character sprite (characters now import at 3× so close-ups stay sharp); voices without a sprite (WHISPER, VOICE, CHILD ONE) show none. Eren has a generated sprite for his portrait.
+- Verified: 127 headless checks pass (adds prologue play-through and skip, portraits, SC01 in the full-chapter run). Title, prologue and portrait reviewed as screenshots.

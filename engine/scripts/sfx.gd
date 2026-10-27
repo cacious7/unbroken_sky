@@ -9,6 +9,8 @@ const SOUNDS := {
 	"whisper_present": preload("res://assets/sfx/whisper_present.wav"),
 	"water_sweep": preload("res://assets/sfx/water_sweep.wav"),
 	"pump_squeak": preload("res://assets/sfx/pump_squeak.wav"),
+	"metal_scrape": preload("res://assets/sfx/metal_scrape.wav"),
+	"door_open": preload("res://assets/sfx/door_open.wav"),
 }
 const VOICES := 6
 

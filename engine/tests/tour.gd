@@ -21,6 +21,37 @@ func _ready() -> void:
 	var out_dir: String = OS.get_cmdline_user_args()[0] if not OS.get_cmdline_user_args().is_empty() else "user://"
 	GameState.save_path = "user://tour_save.json"
 	GameState.scene_changes_enabled = false
+
+	var title: Control = load("res://scenes/main.tscn").instantiate()
+	add_child(title)
+	await _shot(out_dir, "title")
+	title.queue_free()
+
+	var prologue: Node2D = load("res://scenes/prologue.tscn").instantiate()
+	prologue.instant = true
+	prologue.set_process(false)
+	add_child(prologue)
+	prologue._done = true
+	prologue._cut = false
+	prologue._fade = 0.0
+	prologue._hands = 1.0
+	prologue._light = 0.35
+	prologue._sleeve = 0.5
+	prologue.queue_redraw()
+	await _shot(out_dir, "prologue")
+	prologue.queue_free()
+
+	# A dialogue line with a portrait.
+	GameState.new_game()
+	GameState.set_flag("scene_id", "SC03")
+	var cistern: StoryScene = load(GameState.SCENES["SC03"]).instantiate()
+	add_child(cistern)
+	await get_tree().process_frame
+	for i in 3:
+		cistern.dialogue._advance()
+	await _shot(out_dir, "portrait")
+	cistern.queue_free()
+
 	for scene_id: String in SETUP:
 		GameState.new_game()
 		GameState.set_flag("scene_id", scene_id)
@@ -39,3 +70,10 @@ func _ready() -> void:
 		await get_tree().process_frame
 	GameState.delete_save()
 	get_tree().quit()
+
+
+func _shot(out_dir: String, shot_name: String) -> void:
+	for i in 30:
+		await get_tree().process_frame
+	await RenderingServer.frame_post_draw
+	get_viewport().get_texture().get_image().save_png("%s/tour_%s.png" % [out_dir, shot_name])

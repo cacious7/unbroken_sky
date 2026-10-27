@@ -29,6 +29,8 @@ const CAST := {
 		"accent": "#7a5a2a", "lower": "robe", "bottom": "#e3d6b8", "extras": ["beard"]},
 	"lio": {"skin": "#6a4329", "hair": "short", "hair_color": "#1a110b", "top": "#9fb07a",
 		"accent": "#e3d6b8", "lower": "trousers", "bottom": "#4a4a3a", "extras": ["waterskin"]},
+	"eren": {"skin": "#5a3a26", "hair": "short", "hair_color": "#8a857c", "top": "#3a3f44",
+		"accent": "#b8692e", "lower": "trousers", "bottom": "#2e2a26", "extras": ["beard"]},
 	"merchant": {"skin": "#5e3b25", "hair": "bald", "hair_color": "#2a1d14", "top": "#a0703a",
 		"accent": "#e0c060", "lower": "trousers", "bottom": "#5a4632", "extras": ["beard", "satchel"]},
 }
