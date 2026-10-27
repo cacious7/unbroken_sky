@@ -12,6 +12,7 @@ signal defeated
 ## Anything in the "hammer_target" group can be struck: it provides hit_radius,
 ## is_threat() and take_hammer() -> String.
 signal struck(result: String)
+signal dodged
 
 const SPEED := 150.0
 const SIZE := Vector2(20, 28)
@@ -37,6 +38,9 @@ var active := true
 var touch_vector := Vector2.ZERO
 var combat_enabled := false
 var health := MAX_HEALTH
+## Converts a screen position to a gameplay point (set by the 3D view, which can tell
+## where a tap lands on the ground). Returns null when nothing is hit.
+var screen_to_world := Callable()
 var facing := Vector2.RIGHT
 
 var _nearby: Array[Interactable] = []
@@ -57,6 +61,7 @@ var _grace_left := 0.0
 var _cooldown_left := 0.0
 var _swing_left := 0.0
 var _walk_cycle := 0.0
+var _dodging := false
 
 
 func _ready() -> void:
@@ -190,6 +195,12 @@ func dodge() -> void:
 		direction = global_position - threat.global_position if threat != null else -facing
 	_dash(direction, DODGE_SPEED, DODGE_SECONDS)
 	_grace_left = maxf(_grace_left, DODGE_SECONDS + 0.05)
+	_dodging = true
+	dodged.emit()
+
+
+func is_dodging() -> bool:
+	return _dodging and _dash_left > 0.0
 
 
 ## Returns true if the hit landed (false while dodging or recently hit).
@@ -198,6 +209,7 @@ func take_hit(from: Vector2) -> bool:
 		return false
 	health -= 1
 	_grace_left = HIT_GRACE_SECONDS
+	_dodging = false
 	_dash(global_position - from, DODGE_SPEED * 0.6, KNOCKBACK_SECONDS)
 	health_changed.emit(health, MAX_HEALTH)
 	if health == 0:
@@ -219,6 +231,11 @@ func is_protected() -> bool:
 
 ## Walk to a screen position from a tap or click.
 func walk_to_screen(screen_point: Vector2) -> void:
+	if screen_to_world.is_valid():
+		var point: Variant = screen_to_world.call(screen_point)
+		if point != null:
+			walk_to(point)
+		return
 	walk_to(get_canvas_transform().affine_inverse() * screen_point)
 
 

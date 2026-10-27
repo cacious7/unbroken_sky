@@ -1,0 +1,17 @@
+{
+  "about": "Appearance of each character, shared by the 3D figures (scripts/world3d/character_3d.gd) and the 2D portrait generator (tools/generate_characters.gd). Plain colours and simple trim, not real community textiles or ceremonial dress.",
+  "cast": {
+    "tavo": {"skin": "#6b4126", "hair": "short", "hair_color": "#1a110b", "top": "#2f4f7a", "accent": "#d49a3a", "lower": "trousers", "bottom": "#4a3424", "extras": ["satchel", "hammer", "wrist_cuts"]},
+    "sena": {"skin": "#7a4a2c", "hair": "braids", "hair_color": "#1a110b", "top": "#b5562f", "accent": "#3d2b1f", "lower": "trousers", "bottom": "#3d3a35", "extras": ["apron", "tongs"]},
+    "mera": {"skin": "#5e3a24", "hair": "wrap", "hair_color": "#6b4f7a", "top": "#4e5b3c", "accent": "#c9a24a", "lower": "wrap", "bottom": "#6b4f7a", "extras": ["scarf"]},
+    "figure": {"skin": "#4a3a34", "hair": "wrap", "hair_color": "#3e3550", "top": "#323b30", "accent": "#7d6a3a", "lower": "wrap", "bottom": "#3e3550", "extras": ["scarf", "wet"]},
+    "daru": {"skin": "#4f2f1c", "hair": "short", "hair_color": "#120c08", "top": "#6b6a3a", "accent": "#8a2f2f", "lower": "trousers", "bottom": "#3b3a2c", "extras": ["spear", "armband"]},
+    "nali": {"skin": "#6e452a", "hair": "bun", "hair_color": "#120c08", "top": "#e8e2d0", "accent": "#3f7f8a", "lower": "wrap", "bottom": "#3f7f8a", "extras": ["medbag"]},
+    "veya": {"skin": "#5a3720", "hair": "short", "hair_color": "#120c08", "top": "#2e3b4a", "accent": "#c08a3e", "lower": "trousers", "bottom": "#2a2a2a", "extras": ["spanner", "goggles"]},
+    "kesi": {"skin": "#4a2c1a", "hair": "hood", "hair_color": "#8a7a5a", "top": "#5a4e3a", "accent": "#2e2a22", "lower": "trousers", "bottom": "#3a332a", "extras": ["shawl"]},
+    "orun": {"skin": "#5b3a24", "hair": "short", "hair_color": "#9a948a", "top": "#e3d6b8", "accent": "#7a5a2a", "lower": "robe", "bottom": "#e3d6b8", "extras": ["beard"]},
+    "lio": {"skin": "#6a4329", "hair": "short", "hair_color": "#1a110b", "top": "#9fb07a", "accent": "#e3d6b8", "lower": "trousers", "bottom": "#4a4a3a", "extras": ["waterskin"]},
+    "eren": {"skin": "#5a3a26", "hair": "short", "hair_color": "#8a857c", "top": "#3a3f44", "accent": "#b8692e", "lower": "trousers", "bottom": "#2e2a26", "extras": ["beard"]},
+    "merchant": {"skin": "#5e3b25", "hair": "bald", "hair_color": "#2a1d14", "top": "#a0703a", "accent": "#e0c060", "lower": "trousers", "bottom": "#5a4632", "extras": ["beard", "satchel"]}
+  }
+}

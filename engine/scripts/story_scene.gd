@@ -14,8 +14,17 @@ var touch_enabled := true
 var _busy := false
 
 
+var world_view: WorldView
+
+
 func _ready() -> void:
 	_dress_scene()
+	# The game is presented in 3D: the 2D layout keeps running as the gameplay model
+	# (hidden), and WorldView shows it. CanvasLayer UI is unaffected by this modulate.
+	modulate = Color(1, 1, 1, 0)
+	world_view = WorldView.new(self)
+	add_child(world_view)
+	player.screen_to_world = world_view.screen_to_world_2d
 	dialogue.load_file(_dialogue_file())
 	for child in get_children():
 		if child is Interactable:
@@ -150,10 +159,11 @@ func shake(strength: float) -> void:
 	if not Settings.shake_on:
 		return
 	var tween := create_tween().set_ignore_time_scale()
+	# Strength is in screen pixels; the 3D camera shakes by an equivalent small offset.
 	for i in 4:
-		var offset := Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * strength
-		tween.tween_property(self, "shake_offset", offset, 0.03)
-	tween.tween_property(self, "shake_offset", Vector2.ZERO, 0.03)
+		var offset := Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * strength * 0.012
+		tween.tween_property(world_view, "shake_offset", offset, 0.03)
+	tween.tween_property(world_view, "shake_offset", Vector2.ZERO, 0.03)
 
 
 func _vibrate(milliseconds: int) -> void:
