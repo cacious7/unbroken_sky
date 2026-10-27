@@ -19,6 +19,10 @@ var _caption: Label
 var _caption_tween: Tween
 var _combat_hint: Label
 var _damage_flash: ColorRect
+var _meter: Control
+var _meter_label: Label
+var _meter_back: ColorRect
+var _meter_fill: ColorRect
 ## [control, base font size] pairs rescaled when the text size setting changes.
 var _scaled: Array = []
 
@@ -78,6 +82,22 @@ func show_caption(text: String) -> void:
 	_caption_tween = create_tween()
 	_caption_tween.tween_interval(1.4)
 	_caption_tween.tween_property(_caption, "modulate:a", 0.0, 0.4)
+
+
+## A labelled bar (e.g. the eagle's remaining wing strength). fraction is 0..1.
+func set_meter(label: String, fraction: float) -> void:
+	_meter.visible = true
+	_meter_label.text = label
+	_meter_fill.size.x = _meter_back.size.x * clampf(fraction, 0.0, 1.0)
+	_meter_fill.color = Color(0.95, 0.8, 0.35) if fraction > 0.3 else Color(0.95, 0.35, 0.25)
+
+
+func hide_meter() -> void:
+	_meter.visible = false
+
+
+func is_meter_visible() -> bool:
+	return _meter.visible
 
 
 ## A soft red pulse at the screen edge when Tavo is hit (once, not a strobe).
@@ -158,6 +178,33 @@ func _build() -> void:
 	_caption.modulate.a = 0.0
 	root.add_child(_caption)
 	_scaled.append([_caption, 19])
+
+	_meter = Control.new()
+	_meter.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_meter.offset_left = -130
+	_meter.offset_right = 130
+	_meter.offset_top = -64
+	_meter.offset_bottom = -40
+	_meter.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_meter.visible = false
+	root.add_child(_meter)
+	_meter_back = ColorRect.new()
+	_meter_back.color = Color(0, 0, 0, 0.55)
+	_meter_back.position = Vector2(70, 6)
+	_meter_back.size = Vector2(190, 12)
+	_meter_back.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_meter.add_child(_meter_back)
+	_meter_fill = ColorRect.new()
+	_meter_fill.position = _meter_back.position
+	_meter_fill.size = _meter_back.size
+	_meter_fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_meter.add_child(_meter_fill)
+	_meter_label = Label.new()
+	_meter_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	_meter_label.add_theme_constant_override("outline_size", 5)
+	_meter_label.position = Vector2(0, -2)
+	_meter.add_child(_meter_label)
+	_scaled.append([_meter_label, 15])
 
 	_combat_hint = Label.new()
 	_combat_hint.text = "J / E  strike      K / Shift  dodge"

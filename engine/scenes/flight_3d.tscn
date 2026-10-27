@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/flight/flight_scene.gd" id="1_flight"]
+[ext_resource type="Script" path="res://scripts/hud.gd" id="2_hud"]
+[ext_resource type="Script" path="res://scripts/touch_controls.gd" id="3_touch"]
+[ext_resource type="Script" path="res://scripts/dialogue_box.gd" id="4_dialogue"]
+
+[node name="Flight3D" type="Node3D"]
+script = ExtResource("1_flight")
+
+[node name="Hud" type="CanvasLayer" parent="."]
+script = ExtResource("2_hud")
+
+[node name="TouchControls" type="CanvasLayer" parent="."]
+script = ExtResource("3_touch")
+
+[node name="Dialogue" type="CanvasLayer" parent="."]
+script = ExtResource("4_dialogue")

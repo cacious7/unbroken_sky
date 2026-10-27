@@ -69,7 +69,7 @@ A courier, a dying river kingdom and a secret older than him. Chapter One free.
 
 ## Before the first Play upload
 
-1. Choose the permanent package name and set it in both Android presets in `engine/export_presets.cfg` (currently the placeholder `com.unbrokensky.game`).
-2. Fill in the contact address in `docs/privacy-policy.html` and publish it.
+1. Package name: `com.mulawo.unbrokensky` (set in both Android presets; permanent after the first upload). Publisher: Mulawo. Contact: admin@mulawo.com.
+2. Privacy policy: use Mulawo's policy on mulawo.com, **provided it covers this game**. Mulawo's existing policy is for a legal AI assistant, so add a section for The Unbroken Sky (the text in `docs/privacy-policy.html` can be pasted in) and use that page's URL. (mulawo.com was timing out on 27 Oct, so the exact URL is still to confirm.)
 3. Build with `bash engine/tools/build_release.sh` and upload `engine/build/android/unbroken_sky.aab` to a **closed testing** track.
 4. Enrol in Play App Signing (default for new apps). The key in `%USERPROFILE%\.unbroken_sky_keys\` is the upload key; back it up.

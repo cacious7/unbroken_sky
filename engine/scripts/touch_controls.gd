@@ -17,6 +17,8 @@ const DODGE_RADIUS := 38.0
 const TAP_SLOP := 14.0
 
 var device_has_touch := false
+## Flight lets a drag anywhere become the stick, not just on the left half.
+var stick_anywhere := false
 
 var _canvas: Control
 ## Touches that may still become a tap, by index: start position.
@@ -108,7 +110,7 @@ func _input(event: InputEvent) -> void:
 			if event.position.distance_to(start) <= TAP_SLOP:
 				return
 			_pending.erase(event.index)
-			if start.x < _canvas.size.x * 0.5 and _stick_index == -1:
+			if (stick_anywhere or start.x < _canvas.size.x * 0.5) and _stick_index == -1:
 				_stick_index = event.index
 				_stick_origin = start
 		if event.index == _stick_index:

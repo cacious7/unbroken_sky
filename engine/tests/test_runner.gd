@@ -8,7 +8,7 @@ const WELL_YARD := preload("res://scenes/well_yard.tscn")
 const CISTERN := preload("res://scenes/cistern.tscn")
 const HOME := preload("res://scenes/home.tscn")
 const ASH_ROAD := preload("res://scenes/ash_road.tscn")
-const FLIGHT := preload("res://scenes/fortress_flight.tscn")
+const FLIGHT := preload("res://scenes/flight_3d.tscn")
 const CULVERT := preload("res://scenes/culvert.tscn")
 const REED_GATE := preload("res://scenes/reed_gate.tscn")
 const KEEPER_ROOM := preload("res://scenes/keeper_room.tscn")
@@ -23,7 +23,7 @@ const SCENE_DIALOGUE := {
 	"res://scripts/culvert.gd": "res://data/dialogue/sc06.json",
 	"res://scripts/reed_gate.gd": "res://data/dialogue/sc07.json",
 	"res://scripts/keeper_room.gd": "res://data/dialogue/sc08.json",
-	"res://scripts/fortress_flight.gd": "res://data/dialogue/sc09.json",
+	"res://scripts/flight/flight_scene.gd": "res://data/dialogue/sc09.json",
 	"res://scripts/wheel_platform.gd": "res://data/dialogue/sc10.json",
 }
 
@@ -550,59 +550,79 @@ func _test_sc05_encounter() -> void:
 
 # --- Flight -------------------------------------------------------------------
 
-func _test_flight() -> void:
-	_start_at("SC09")
-	var flight := await _spawn(FLIGHT)
-	var eagle: Eagle = flight.get_node("Eagle")
-	var perches: Array = [flight.get_node("Perch0"), flight.get_node("Perch1"),
-			flight.get_node("Perch2"), flight.get_node("Perch3")]
-	_check(GameState.get_flag("sc09_started") and not flight.player.visible and not eagle.flying,
-			"SC09: Tavo falls and perches as an eagle")
+func _spawn_flight() -> Node3D:
+	var flight: Node3D = FLIGHT.instantiate()
+	flight.get_node("Dialogue").auto_finish = true
+	add_child(flight)
+	await _settle()
+	return flight
 
-	await flight.takeoff()
-	await _physics_frames(150)
-	_check(flight.link() == 1 and not eagle.flying, "SC09: first link is safe without steering")
 
-	await flight.takeoff()
-	_check(GameState.get_flag("sc09_voice_heard") and eagle.flying, "SC09: the voice speaks before the gust link")
-	eagle.airtime = 0.0
-	await _physics_frames(2)
-	_check(flight.link() == 1 and not eagle.flying and eagle.global_position == perches[1].global_position,
-			"SC09: tired wings return the eagle to the last perch")
-
-	await flight.takeoff()
-	eagle.global_position = Vector2(2000, 2000)
-	await _physics_frames(2)
-	_check(not eagle.flying and flight.link() == 1, "SC09: leaving the area also returns to the perch")
-
-	# The gust pushes the eagle down compared with still air.
-	var gust: Gust = flight.get_node("Gust")
-	eagle.perch_at(gust.global_position, Vector2.RIGHT)
-	eagle.launch(Vector2.RIGHT, 3.0)
-	var start_y := eagle.global_position.y
-	eagle.fly(0.1, Vector2.ZERO, flight._wind(0.1))
-	_check(eagle.global_position.y > start_y + 10.0, "SC09: the gust pushes the eagle off course")
-	var updraft: Gust = flight.get_node("Updraft")
-	eagle.global_position = updraft.global_position
-	eagle.airtime = 1.0
-	flight._wind(0.5)
-	_check(eagle.airtime > 1.0, "SC09: the updraft restores airtime")
-
-	Settings.flight_assist = true
-	_check(is_equal_approx(perches[2].landing_radius(), perches[2].radius * 1.5), "SC09: assist widens landings")
-	Settings.flight_assist = false
-
-	flight._perch_at(1)
-	await flight.takeoff()
-	eagle.global_position = perches[2].global_position
-	await _physics_frames(2)
-	await flight.takeoff()
-	eagle.global_position = perches[3].global_position
+func _land_on(flight: Node3D, index: int) -> void:
+	flight.eagle.position = flight.perch_position(index) + flight.PERCH_LIFT
 	await _physics_frames(2)
 	await _settle()
+
+
+func _test_flight() -> void:
+	_start_at("SC09")
+	var flight := await _spawn_flight()
+	var eagle: Eagle3D = flight.eagle
+	_check(GameState.get_flag("sc09_started") and not flight.tavo.visible and not flight.is_flying()
+			and eagle.position.distance_to(flight.perch_position(0)) < 1.0,
+			"SC09 (3D): Tavo falls and perches as an eagle on the broken wall")
+
+	await flight.takeoff()
+	await _physics_frames(330)
+	_check(flight.link() == 1 and not flight.is_flying(),
+			"SC09 (3D): the first link is safe with no steering at all")
+
+	await flight.takeoff()
+	_check(GameState.get_flag("sc09_voice_heard") and flight.is_flying(),
+			"SC09 (3D): the voice speaks before the gust link")
+	flight.stamina = 0.0
+	await _physics_frames(2)
+	_check(flight.link() == 1 and not flight.is_flying()
+			and eagle.position.distance_to(flight.perch_position(1)) < 1.0,
+			"SC09 (3D): tired wings return the eagle to the last perch")
+
+	await flight.takeoff()
+	eagle.position = Vector3(0, 3, -100)
+	eagle.position.y = 0.2
+	await _physics_frames(2)
+	_check(not flight.is_flying() and flight.link() == 1, "SC09 (3D): touching the water returns to the perch")
+
+	await flight.takeoff()
+	eagle.position = Vector3(500, 20, 0)
+	await _physics_frames(2)
+	_check(not flight.is_flying(), "SC09 (3D): leaving the fortress returns to the perch")
+
+	var gust: Dictionary = flight.ZONES[0]
+	var lift: Dictionary = flight.ZONES[1]
+	var gust_wind: Array = flight.wind_at(gust.center)
+	var lift_wind: Array = flight.wind_at(lift.center)
+	_check(gust_wind[0].x > 5.0 and gust_wind[0].y < 0.0 and not gust_wind[2],
+			"SC09 (3D): the gust shoves the eagle sideways and down")
+	_check(lift_wind[1] > 0.0 and lift_wind[2] and lift.center.x < gust.center.x,
+			"SC09 (3D): the updraft lifts, and it is to the left of the gust")
+	var straight_line_midpoint: Vector3 = (flight.perch_position(1) + flight.perch_position(2)) / 2.0
+	_check(flight.wind_at(straight_line_midpoint)[0] != Vector3.ZERO,
+			"SC09 (3D): the gust sits on the straight line between the perches")
+
+	Settings.flight_assist = true
+	var assisted: float = flight.landing_radius()
+	var assisted_gust: Vector3 = flight.wind_at(gust.center)[0]
+	Settings.flight_assist = false
+	_check(assisted > flight.landing_radius() and assisted_gust.length() < gust_wind[0].length(),
+			"SC09 (3D): flight assist widens landings and weakens the gust")
+
+	await flight.takeoff()
+	await _land_on(flight, 2)
+	await flight.takeoff()
+	await _land_on(flight, 3)
 	_check(GameState.get_flag("sc09_complete") and GameState.get_flag("eagle_unlocked")
-			and flight.player.visible and not eagle.visible,
-			"SC09: landing on the wheel platform turns Tavo human and unlocks the eagle")
+			and flight.tavo.visible and not eagle.visible and GameState.get_flag("scene_id") == "SC10",
+			"SC09 (3D): landing on the wheel platform turns Tavo human, unlocks the eagle, on to SC10")
 	await _close(flight)
 
 
@@ -712,6 +732,13 @@ func _test_full_chapter() -> void:
 		if scene_id == "SC01":
 			await _close(await _spawn_prologue())
 			continue
+		if scene_id == "SC09":
+			var flight := await _spawn_flight()
+			for perch in [1, 2, 3]:
+				await flight.takeoff()
+				await _land_on(flight, perch)
+			await _close(flight)
+			continue
 		var scene := await _spawn(load(GameState.SCENES[scene_id]), ["c1_joint"])
 		match scene_id:
 			"SC02":
@@ -747,12 +774,6 @@ func _test_full_chapter() -> void:
 				scene.player.global_position = Vector2(480, 80)
 				await _physics_frames(2)
 				await _settle()
-			"SC09":
-				for perch_name: String in ["Perch1", "Perch2", "Perch3"]:
-					await scene.takeoff()
-					scene.get_node("Eagle").global_position = scene.get_node(perch_name).global_position
-					await _physics_frames(2)
-					await _settle()
 			"SC10":
 				await _use(scene, "Bypass")
 		await _close(scene)

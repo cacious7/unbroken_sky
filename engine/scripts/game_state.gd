@@ -15,7 +15,7 @@ const SCENES := {
 	"SC06": "res://scenes/culvert.tscn",
 	"SC07": "res://scenes/reed_gate.tscn",
 	"SC08": "res://scenes/keeper_room.tscn",
-	"SC09": "res://scenes/fortress_flight.tscn",
+	"SC09": "res://scenes/flight_3d.tscn",
 	"SC10": "res://scenes/wheel_platform.tscn",
 }
 

@@ -12,7 +12,6 @@ const SETUP := {
 	"SC06": {"sc06_arrived": true},
 	"SC07": {"sc07_arrived": true},
 	"SC08": {"sc08_talked": true},
-	"SC09": {"sc09_started": true},
 	"SC10": {"sc10_arrived": true},
 }
 
@@ -51,6 +50,8 @@ func _ready() -> void:
 		cistern.dialogue._advance()
 	await _shot(out_dir, "portrait")
 	cistern.queue_free()
+
+	await preload("res://tests/store_shots.gd")._flight_shot(self, "%s/tour_SC09.png" % out_dir)
 
 	for scene_id: String in SETUP:
 		GameState.new_game()

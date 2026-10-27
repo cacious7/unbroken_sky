@@ -41,13 +41,7 @@ func _ready() -> void:
 	await _scene(out, "screenshot_4_culvert", "SC06", {"sc06_arrived": true, "sc06_inspected": true}, func(s: StoryScene) -> void:
 		s.player.global_position = Vector2(400, 300)
 		s.dialogue.play("question"))
-	await _scene(out, "screenshot_5_flight", "SC09", {"sc09_started": true, "sc09_link": 1}, func(s: StoryScene) -> void:
-		var eagle: Eagle = s.get_node("Eagle")
-		eagle.launch(Vector2(1, -0.6), 3.5)
-		eagle.global_position = Vector2(470, 190)
-		eagle.airtime = 2.4
-		s.set_physics_process(false)
-		s.hud.set_objective("Fly to the bright perch before your wings tire."))
+	await _flight_shot(self, out + "screenshot_5_flight.png")
 	await _scene(out, "screenshot_6_reed_gate", "SC07", {"sc07_arrived": true}, func(s: StoryScene) -> void:
 		s.player.global_position = Vector2(640, 250)
 		s.dialogue.play("veya"))
@@ -100,6 +94,40 @@ func _scene(out: String, file_name: String, scene_id: String, flags: Dictionary,
 	Settings.text_speed = 0
 	scene.queue_free()
 	await get_tree().process_frame
+
+
+## The 3D flight mid-link: banking towards the gust with the tower step ahead.
+## Shared with tests/tour.gd.
+static func _flight_shot(host: Node, path: String) -> void:
+	GameState.new_game()
+	for key: String in ["sc09_started", "sc09_voice_heard"]:
+		GameState.set_flag(key, true)
+	GameState.set_flag("scene_id", "SC09")
+	GameState.set_flag("sc09_link", 1)
+	var flight: Node3D = load("res://scenes/flight_3d.tscn").instantiate()
+	flight.get_node("Dialogue").auto_finish = true
+	host.add_child(flight)
+	for i in 3:
+		await host.get_tree().process_frame
+	await flight.takeoff()
+	flight.set_physics_process(false)
+	flight._yaw = 0.45
+	flight._pitch = 0.12
+	flight._bank = 0.3
+	flight.eagle.position = Vector3(22, 15, -84)
+	flight.eagle.rotation = Vector3(flight._pitch, flight._yaw, 0)
+	flight.eagle.bank = flight._bank
+	flight.eagle.flap = 0.6
+	flight.camera.fov = 80.0
+	flight._update_camera(0.0, true)
+	flight.hud.set_meter("WINGS", 0.7)
+	flight._refresh_objective()
+	for i in 20:
+		await host.get_tree().process_frame
+	await RenderingServer.frame_post_draw
+	host.get_viewport().get_texture().get_image().save_png(path)
+	flight.queue_free()
+	await host.get_tree().process_frame
 
 
 func _save(path: String, size := Vector2i.ZERO) -> void:

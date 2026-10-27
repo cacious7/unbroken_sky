@@ -50,24 +50,6 @@ func _ready() -> void:
 	road.queue_free()
 	await _frames(2)
 
-	# Flight mid-link, over the gust.
-	GameState.new_game()
-	GameState.set_flag("sc09_started", true)
-	GameState.set_flag("sc09_link", 1)
-	var flight: StoryScene = load("res://scenes/fortress_flight.tscn").instantiate()
-	add_child(flight)
-	await _frames(3)
-	flight.takeoff()
-	await _frames(2)
-	var eagle: Eagle = flight.get_node("Eagle")
-	eagle.global_position = Vector2(520, 250)
-	eagle.airtime = 1.5
-	flight.set_physics_process(false)
-	eagle.queue_redraw()
-	flight.hud.set_objective(flight._objective())
-	await _shot("%s/flight.png" % out_dir)
-	flight.queue_free()
-	await _frames(2)
 
 	GameState.delete_save()
 	get_tree().quit()
