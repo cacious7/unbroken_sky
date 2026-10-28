@@ -114,10 +114,12 @@ prompt = "Continue to Reed Gate"
 [node name="HuskOne" type="CharacterBody2D" parent="."]
 position = Vector2(560, 250)
 script = ExtResource("8_husk")
+flank = -0.7
 
 [node name="HuskTwo" type="CharacterBody2D" parent="."]
 position = Vector2(870, 330)
 script = ExtResource("8_husk")
+flank = 0.8
 
 [node name="Player" type="CharacterBody2D" parent="."]
 position = Vector2(70, 290)

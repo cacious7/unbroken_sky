@@ -7,12 +7,19 @@ extends StoryScene
 const AMBUSH_X := 300.0
 ## Where Tavo restarts after defeat: the encounter entrance.
 const ENTRANCE := Vector2(250, 290)
+## The second husk enters this far from Tavo, behind or beside him, where it is heard first.
+const FLANK_ENTRY_DISTANCE := 200.0
+## Directions tried for that entry relative to Tavo's view: behind, then the rear quarters, then the sides.
+const FLANK_ENTRY_ANGLES: Array[float] = [PI, PI - 0.6, PI + 0.6, PI / 2.0, -PI / 2.0]
+## Entry points stay this far inside the walls.
+const ROAD_BOUNDS := Rect2(60, 60, 840, 420)
 
 const RESULT_CAPTIONS := {
 	"deflect": "[the hammer glances off the shell]",
 	"interrupt": "[strike interrupted: connector exposed]",
 	"hit": "[the copper connector cracks]",
 	"break": "[the husk collapses]",
+	"feint": "[the lunge falls short: it was finding its reach]",
 }
 
 @onready var husk_one: Husk = $HuskOne
@@ -31,6 +38,7 @@ func _start() -> void:
 	for husk: Husk in [husk_one, husk_two]:
 		husk.state_changed.connect(_on_husk_state)
 		husk.broken.connect(_on_husk_broken)
+		husk.feinted.connect(func(_husk: Husk) -> void: hud.show_caption(RESULT_CAPTIONS["feint"]))
 	player.defeated.connect(_on_defeated)
 	player.struck.connect(_on_struck)
 	if GameState.get_flag("sc05_husk_one_down"):
@@ -65,6 +73,9 @@ func _begin_first() -> void:
 	_fighting = true
 	set_combat(true)
 	_refresh_objective()
+	# A husk waking fresh rehearses its tell once, harmlessly.
+	if husk_one.state == Husk.State.DORMANT:
+		husk_one.practice_strikes = 1
 	husk_one.activate(player)
 	await _say("ambush")
 
@@ -79,6 +90,7 @@ func _begin_second() -> void:
 func _on_husk_broken(husk: Husk) -> void:
 	if husk == husk_one:
 		GameState.set_flag("sc05_husk_one_down", true)
+		_place_behind_player(husk_two)
 		await _say("second")
 		_begin_second()
 	else:
@@ -94,6 +106,25 @@ func _after_fight() -> void:
 	GameState.set_flag("sc05_merchant_done", true)
 	_refresh_people()
 	_refresh_objective()
+
+
+## Moves the husk to the first clear spot behind or beside Tavo. If none is clear it
+## keeps its authored position up the road.
+func _place_behind_player(husk: Husk) -> void:
+	var query := PhysicsShapeQueryParameters2D.new()
+	var circle := CircleShape2D.new()
+	circle.radius = Husk.RADIUS + 4.0
+	query.shape = circle
+	query.exclude = [husk.get_rid(), player.get_rid()]
+	var space := get_world_2d().direct_space_state
+	for angle in FLANK_ENTRY_ANGLES:
+		var point := player.global_position + player.aim_direction.rotated(angle) * FLANK_ENTRY_DISTANCE
+		if not ROAD_BOUNDS.has_point(point):
+			continue
+		query.transform = Transform2D(0.0, point)
+		if space.intersect_shape(query, 1).is_empty():
+			husk.global_position = point
+			return
 
 
 func _on_defeated() -> void:

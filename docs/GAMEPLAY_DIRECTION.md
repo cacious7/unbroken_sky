@@ -38,7 +38,7 @@ Silent stage entries describe a real camera/animation/sound beat; their stage la
 | Well yard | Move, collect, time the repair, pump; uncover the threat | Better hand contact and final character assets |
 | Cistern | Inspect supply, make a consequential allocation, carry/fit the pipe | Animate actual handoffs and both repair partners |
 | Home | Collect useful equipment between short exchanges | Proper prop handoff and bag animation |
-| Ash Road | Dodge, interrupt, strike; second enemy escalates | More varied enemy positioning and a safe practice tell |
+| Ash Road | Dodge, interrupt, strike; a harmless practice lunge, flanking approaches, a second husk from behind with a ring cue | Phone check of the ring cue size and practice-lunge timing with an uncoached player |
 | Culvert | Inspect the false reflection, challenge it, evade/attack water | Animated reflection mismatch and collapse of the mimic |
 | Reed Gate | Drain, brace, unlock | Visible reservoir motion, valve and lock animation |
 | Keeper room | Focused revelation, then a moving flood escape | Better keeper staging and child-height memory cuts |

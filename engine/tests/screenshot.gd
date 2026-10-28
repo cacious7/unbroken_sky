@@ -47,6 +47,13 @@ func _ready() -> void:
 	husk._enter(Husk.State.RECOVERY)
 	road.hud.show_caption("[strike interrupted: connector exposed]")
 	await _shot("%s/combat_recovery.png" % out_dir)
+	# An unseen husk winding up behind Tavo marks the reticle ring on its side.
+	husk.global_position = road.player.global_position - road.player.aim_direction.rotated(0.5) * 120.0
+	husk._enter(Husk.State.WINDUP)
+	husk._left = 0.2
+	road.hud.show_caption("[husk creaks: winding up]")
+	await _frames(2)
+	await _shot("%s/combat_flank_cue.png" % out_dir)
 	road.queue_free()
 	await _frames(2)
 

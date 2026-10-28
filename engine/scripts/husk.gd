@@ -5,9 +5,13 @@ extends CharacterBody2D
 ## connector is exposed, and breakable, only during recovery. A hammer hit during
 ## the windup interrupts the strike and goes straight to recovery.
 ## Husks act only while the player can act, so dialogue and pauses freeze them.
+## A practice strike plays the full tell but lunges short, so the first attack teaches
+## the rhythm without costing health.
 
 signal state_changed(husk: Husk, state: int)
 signal broken(husk: Husk)
+## A practice lunge has fallen short.
+signal feinted(husk: Husk)
 
 enum State { DORMANT, APPROACH, WINDUP, STRIKE, RECOVERY, BROKEN }
 
@@ -27,8 +31,17 @@ const HIT_DISTANCE := 26.0
 ## Stagger after a hammer hit: about 12 px of travel.
 const KNOCKBACK_SPEED := 180.0
 const KNOCKBACK_DECEL := 1400.0
+## A practice lunge travels this fraction of a real one and cannot land.
+const FEINT_SPEED_SCALE := 0.3
+## Beyond this distance the approach curves by the full flank angle; closer in it straightens.
+const FLANK_RANGE := 160.0
 
 @export var max_health := 3
+## Approach curve in radians, so the husk comes in from one side rather than head on.
+@export var flank := 0.0
+
+## Windups left that end in a harmless short lunge.
+var practice_strikes := 0
 
 var hit_radius := RADIUS
 var state: State = State.DORMANT
@@ -40,6 +53,7 @@ var _lunge := Vector2.RIGHT
 var _landed_hit := false
 var _knockback := Vector2.ZERO
 var _start_position := Vector2.ZERO
+var _feint := false
 
 
 func _ready() -> void:
@@ -86,6 +100,11 @@ func is_connector_exposed() -> bool:
 	return state == State.RECOVERY
 
 
+## 0 as a windup begins, rising to 1 as it strikes.
+func windup_progress() -> float:
+	return 1.0 - _left / WINDUP_SECONDS if state == State.WINDUP else 0.0
+
+
 ## Resolves one hammer blow: "interrupt", "hit", "break" or "deflect".
 func take_hammer() -> String:
 	match state:
@@ -113,7 +132,8 @@ func _physics_process(delta: float) -> void:
 	var to_target := target.global_position - global_position
 	match state:
 		State.APPROACH:
-			velocity = to_target.normalized() * SPEED
+			var curve := flank * clampf((to_target.length() - ATTACK_DISTANCE) / FLANK_RANGE, 0.0, 1.0)
+			velocity = to_target.normalized().rotated(curve) * SPEED
 			if to_target.length() <= ATTACK_DISTANCE:
 				_enter(State.WINDUP)
 		State.WINDUP:
@@ -124,8 +144,8 @@ func _physics_process(delta: float) -> void:
 			if _left <= 0.0:
 				_enter(State.STRIKE)
 		State.STRIKE:
-			velocity = _lunge * STRIKE_SPEED
-			if not _landed_hit and to_target.length() - RADIUS <= HIT_DISTANCE:
+			velocity = _lunge * STRIKE_SPEED * (FEINT_SPEED_SCALE if _feint else 1.0)
+			if not _feint and not _landed_hit and to_target.length() - RADIUS <= HIT_DISTANCE:
 				_landed_hit = target.take_hit(global_position)
 			if _left <= 0.0:
 				_enter(State.RECOVERY)
@@ -145,12 +165,17 @@ func _knock_back() -> void:
 
 
 func _enter(new_state: State) -> void:
+	var feint_finished := state == State.STRIKE and _feint
 	state = new_state
 	_landed_hit = false
 	_knockback = Vector2.ZERO
+	if new_state != State.STRIKE:
+		_feint = false
 	match new_state:
 		State.WINDUP:
 			_left = WINDUP_SECONDS
+			_feint = practice_strikes > 0
+			practice_strikes = maxi(0, practice_strikes - 1)
 			Sfx.play("husk_windup")
 		State.STRIKE:
 			_left = STRIKE_SECONDS
@@ -160,6 +185,8 @@ func _enter(new_state: State) -> void:
 			_left = 0.0
 	velocity = Vector2.ZERO
 	state_changed.emit(self, new_state)
+	if feint_finished:
+		feinted.emit(self)
 	queue_redraw()
 
 

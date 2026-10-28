@@ -508,6 +508,57 @@ func _test_husk_fights_back() -> void:
 	_check(road.player.health < Player.MAX_HEALTH, "husk: windup then strike lands on a player who stands still")
 	await _close(road)
 
+	# A practice strike shows the full tell, falls short, and only the next one is real.
+	_start_at("SC05")
+	GameState.set_flag("sc05_arrived", true)
+	road = await _spawn(ASH_ROAD)
+	husk = road.get_node("HuskOne")
+	road.player.global_position = husk.global_position + Vector2(-50, 0)
+	road.set_combat(true)
+	var feints := []
+	husk.feinted.connect(func(_h: Husk) -> void: feints.append(true))
+	husk.practice_strikes = 1
+	husk.activate(road.player)
+	await _physics_frames(90)
+	_check(road.player.health == Player.MAX_HEALTH and feints.size() == 1
+			and road.hud.caption_text().contains("falls short"),
+			"husk: the practice lunge plays its tell but cannot hurt")
+	await _physics_frames(200)
+	_check(road.player.health < Player.MAX_HEALTH and feints.size() == 1,
+			"husk: the strike after the practice is real")
+	await _close(road)
+
+	# An interrupted practice windup does not report a feint.
+	_start_at("SC05")
+	GameState.set_flag("sc05_arrived", true)
+	road = await _spawn(ASH_ROAD)
+	husk = road.get_node("HuskOne")
+	feints = []
+	husk.feinted.connect(func(_h: Husk) -> void: feints.append(true))
+	husk.practice_strikes = 1
+	husk.activate(road.player)
+	husk._enter(Husk.State.WINDUP)
+	_check(husk.take_hammer() == "interrupt" and feints.is_empty() and husk.practice_strikes == 0,
+			"husk: interrupting the practice windup spends it without a false feint")
+	await _close(road)
+
+	# Flanking: far away the approach curves to one side; close in it heads straight.
+	_start_at("SC05")
+	GameState.set_flag("sc05_arrived", true)
+	road = await _spawn(ASH_ROAD)
+	husk = road.get_node("HuskTwo")
+	road.player.global_position = husk.global_position + Vector2(-300, 0)
+	husk.activate(road.player)
+	await _physics_frames(2)
+	var toward: Vector2 = road.player.global_position - husk.global_position
+	_check(absf(husk.velocity.angle_to(toward)) > 0.5, "husk: a distant husk curves in from the side")
+	husk.global_position = road.player.global_position + Vector2(Husk.ATTACK_DISTANCE + 4, 0)
+	await _physics_frames(1)
+	toward = road.player.global_position - husk.global_position
+	_check(husk.state != Husk.State.APPROACH or absf(husk.velocity.angle_to(toward)) < 0.1,
+			"husk: the flank straightens out at striking distance")
+	await _close(road)
+
 
 func _test_sc05_encounter() -> void:
 	_start_at("SC05")
@@ -522,6 +573,7 @@ func _test_sc05_encounter() -> void:
 	await _physics_frames(3)
 	await _settle()
 	_check(one.is_threat() and road.player.combat_enabled, "SC05: walking up the road wakes the first husk")
+	_check(one.practice_strikes == 1, "SC05: the ambush opens with a safe practice lunge")
 
 	one._enter(Husk.State.RECOVERY)
 	for i in 3:
@@ -529,6 +581,14 @@ func _test_sc05_encounter() -> void:
 	await _settle()
 	_check(GameState.get_flag("sc05_husk_one_down") and two.visible and two.is_threat(),
 			"SC05: second husk enters only after the first breaks")
+	var from_player: Vector2 = two.global_position - road.player.global_position
+	_check(from_player.normalized().dot(road.player.aim_direction) < 0.0 and road.ROAD_BOUNDS.has_point(two.global_position),
+			"SC05: the second husk enters behind Tavo, inside the road")
+	var rig: Node3D = road.world_view.first_person
+	_check(rig.offscreen_threats().has(two), "SC05: an unseen husk marks the reticle ring on its side")
+	rig.yaw = atan2(-from_player.x, -from_player.y)
+	rig._process(0.0)
+	_check(not rig.offscreen_threats().has(two), "SC05: the ring cue clears once Tavo turns to face it")
 
 	# Defeat: back to the entrance, full health, husk reset, nothing else lost.
 	two._enter(Husk.State.RECOVERY)

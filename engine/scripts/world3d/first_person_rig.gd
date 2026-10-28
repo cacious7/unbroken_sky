@@ -1,6 +1,10 @@
 extends Node3D
 ## Eye-level play; scripted story shots may temporarily own the camera.
 const HAND_REST := Vector3(0.12, -0.15, 0.06)
+## Husks closer than this (world units) and outside the view get a ring cue.
+const THREAT_CUE_RANGE := 260.0
+## Half the horizontal view, in radians, treated as "seen" for that cue.
+const THREAT_CUE_HALF_VIEW := 0.85
 
 var _view: Node3D
 var _camera: Camera3D
@@ -212,15 +216,44 @@ func _draw_aim() -> void:
 		for corner: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(-1, 1), Vector2(1, 1)]:
 			_aim_canvas.draw_line(center + corner * 11, center + corner * 17, confirmation, 2, true)
 	if _damage_left > 0.0:
-		var toward := _damage_source - _player.global_position
-		var bearing := -wrapf(atan2(-toward.x, -toward.y) - yaw, -PI, PI) - PI / 2.0
+		var bearing := _screen_bearing(_damage_source - _player.global_position)
 		_aim_canvas.draw_arc(center, 74, bearing - 0.36, bearing + 0.36, 20, Color(0.95, 0.26, 0.15, minf(0.85, _damage_left)), 5, true)
+	if _player.combat_enabled and _player.active:
+		_draw_offscreen_threats(center)
 	if _has_goal:
 		var origin := Vector2(center.x, 29)
 		var points := PackedVector2Array()
 		for point: Vector2 in [Vector2(-7, 7), Vector2(0, -8), Vector2(7, 7), Vector2(0, 3)]:
 			points.append(origin + point.rotated(_goal_angle))
 		_aim_canvas.draw_colored_polygon(points, Color("#edc57d"))
+
+
+## Canvas angle on the reticle ring for a world direction; straight ahead is up.
+func _screen_bearing(toward: Vector2) -> float:
+	return -wrapf(atan2(-toward.x, -toward.y) - yaw, -PI, PI) - PI / 2.0
+
+
+## A husk the player cannot see marks the ring on its side: faint while it closes in,
+## brightening and thickening through its windup so a strike from behind is fair.
+func _draw_offscreen_threats(center: Vector2) -> void:
+	for husk: Husk in offscreen_threats():
+		var progress := husk.windup_progress()
+		var bearing := _screen_bearing(husk.global_position - _player.global_position)
+		var color := Color(1.0, 0.6, 0.12, 0.35 + 0.6 * progress if husk.state == Husk.State.WINDUP else 0.3)
+		_aim_canvas.draw_arc(center, 82, bearing - 0.28, bearing + 0.28, 16, color, 3.0 + 4.0 * progress, true)
+
+
+## Active husks near enough to matter but outside the view.
+func offscreen_threats() -> Array[Husk]:
+	var found: Array[Husk] = []
+	for node in get_tree().get_nodes_in_group("hammer_target"):
+		var husk := node as Husk
+		if husk == null or not husk.is_threat() or not husk.visible:
+			continue
+		var toward := husk.global_position - _player.global_position
+		if toward.length() <= THREAT_CUE_RANGE and toward.normalized().dot(_player.aim_direction) < cos(THREAT_CUE_HALF_VIEW):
+			found.append(husk)
+	return found
 
 
 func _update_sleeves() -> void:
