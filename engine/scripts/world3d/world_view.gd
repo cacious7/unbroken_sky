@@ -9,11 +9,11 @@ extends Node3D
 
 const METRES_PER_PIXEL := 1.0 / 40.0
 const ROOM := Vector2(24.0, 13.5)
-const CAMERA_OFFSET := Vector3(0, 9.0, 5.8)
+const CAMERA_OFFSET := Vector3(0, 7.8, 7.4)
 
 ## Lighting per scene (keyed by the scene's root node name).
 const MOODS := {
-	"WellYard": {"hdri": "qwantani_dawn_puresky", "sky": "#7fa8d0", "horizon": "#f2cf98", "sun": Vector3(-38, -30, 0), "sun_color": "#ffe2b8", "energy": 1.15, "ambient": 0.55, "outdoor": true, "fog": 0.0},
+	"WellYard": {"hdri": "qwantani_dawn_puresky", "sky": "#7fa8d0", "horizon": "#f2cf98", "sun": Vector3(-38, -30, 0), "sun_color": "#ffe2b8", "energy": 1.15, "ambient": 0.55, "outdoor": true, "fog": 0.0015},
 	"Cistern": {"hdri": "qwantani_noon_puresky", "sky": "#86b2d8", "horizon": "#f0d6a8", "sun": Vector3(-55, -20, 0), "sun_color": "#fff0d8", "energy": 1.2, "ambient": 0.55, "outdoor": true, "fog": 0.0},
 	"Home": {"sky": "#3a2a20", "horizon": "#6a4a30", "sun": Vector3(-62, 25, 0), "sun_color": "#ffd8a0", "energy": 0.9, "ambient": 0.7, "outdoor": false, "fog": 0.0},
 	"AshRoad": {"hdri": "qwantani_noon_puresky", "sky": "#a8c4dc", "horizon": "#f8e0b0", "sun": Vector3(-68, -10, 0), "sun_color": "#fff6e0", "energy": 1.35, "ambient": 0.5, "outdoor": true, "fog": 0.0},
@@ -36,8 +36,13 @@ var _rope_column: MeshInstance3D
 var _flood: MeshInstance3D
 var _focus_ring: MeshInstance3D
 var _last_health := Player.MAX_HEALTH
-## Tall objects that fade out when they stand between the camera and Tavo.
-var _tall: Array[Node3D] = []
+var _shot: Dictionary = {}
+var _speaking: CastFigure
+var _carried_pipe: MeshInstance3D
+var _life: Node3D
+var first_person: Node3D
+var _collapsing := false
+var _collapse_time := 0.0
 
 
 static func to_3d(point: Vector2, height := 0.0) -> Vector3:
@@ -63,11 +68,20 @@ func _ready() -> void:
 	_dress_surroundings()
 	_build_player()
 	_build_focus_ring()
+	_build_story_props()
+	_life = preload("res://scripts/world3d/world_life.gd").new()
+	_life.configure(self)
+	add_child(_life)
+	if scene.name == "KeeperRoom":
+		_build_keeper_landings()
 	camera = Camera3D.new()
 	camera.fov = 50.0
 	camera.far = 200.0
 	add_child(camera)
 	camera.current = true
+	first_person = preload("res://scripts/world3d/first_person_rig.gd").new()
+	first_person.configure(self, camera)
+	add_child(first_person)
 	_update_camera(0.0, true)
 
 
@@ -78,6 +92,19 @@ func screen_to_world_2d(screen_point: Vector2) -> Variant:
 	var direction := camera.project_ray_normal(screen_point)
 	if absf(direction.y) < 0.0001:
 		return null
+	if scene.name == "KeeperRoom":
+		var best := INF
+		var hit: Variant = null
+		for i in 31:
+			var height := i * 0.15
+			var along := (height - origin.y) / direction.y
+			if along <= 0.0 or along >= best:
+				continue
+			var point := to_2d(origin + direction * along)
+			if absf(keeper_height(point) - height) < 0.02:
+				best = along
+				hit = point
+		return hit
 	var distance := -origin.y / direction.y
 	if distance < 0.0:
 		return null
@@ -85,36 +112,32 @@ func screen_to_world_2d(screen_point: Vector2) -> Variant:
 
 
 func _process(delta: float) -> void:
-	_sync_player()
+	if _collapsing:
+		_collapse_time += delta
+		tavo.position.y -= (1.0 + _collapse_time * 12.0) * delta
+		tavo.rotation.z += delta * 0.5
+	else:
+		_sync_player()
 	var player_3d := to_3d(scene.player.global_position)
 	for husk_view in _husks:
 		husk_view.sync(to_3d, player_3d)
 	for mirror: Array in _mirrors:
 		var source: CanvasItem = mirror[0]
-		(mirror[1] as Node3D).visible = source.visible
+		var model := mirror[1] as Node3D
+		model.visible = source.visible
+		if source is Interactable:
+			if model is Label3D:
+				model.position = to_3d(source.global_position, 2.3)
+				model.visible = false # Context comes from the aimed HUD prompt, not floating names.
+			else:
+				model.position = to_3d(source.global_position)
 		if mirror[2] != null and source.get("label") != null:
 			(mirror[2] as Label3D).text = source.label
 	_sync_rope()
 	_sync_flood()
 	_sync_focus()
-	_fade_occluders()
+	_sync_story_props(delta)
 	_update_camera(delta)
-
-
-## Tall props between the camera (to the south) and Tavo turn see-through.
-func _fade_occluders() -> void:
-	var player_3d := to_3d(scene.player.global_position)
-	for node in _tall:
-		var in_front := node.position.z > player_3d.z + 0.8 and node.position.z < player_3d.z + 7.0 \
-				and absf(node.position.x - player_3d.x) < 4.0
-		var fade := 0.7 if in_front else 0.0
-		for mesh: GeometryInstance3D in node.find_children("", "GeometryInstance3D", true, false):
-			mesh.transparency = fade
-
-
-func _register_if_tall(node: Node3D) -> void:
-	if Props3D._bounds(node).size.y > 1.2:
-		_tall.append(node)
 
 
 # --- Building ---------------------------------------------------------------------
@@ -151,6 +174,7 @@ func _build_environment(mood: Dictionary) -> void:
 		environment.fog_enabled = true
 		environment.fog_light_color = Color(mood.horizon)
 		environment.fog_density = mood.fog
+		environment.fog_sky_affect = 0.1
 	var world_environment := WorldEnvironment.new()
 	world_environment.environment = environment
 	add_child(world_environment)
@@ -216,7 +240,7 @@ func _build_block(block: Node2D) -> void:
 		# fortress wall along the far edge stands tall.
 		var height := 1.0
 		if block.name.begins_with("Ledge"):
-			height = 0.8
+			height = {"LedgeLow": 1.5, "LedgeMiddle": 3.0, "LedgeHigh": 4.5}.get(String(block.name), 0.8) if scene.name == "KeeperRoom" else 0.8
 		elif block.label == "FORTRESS WALL":
 			height = 3.2
 		elif block.name.begins_with("Edge"):
@@ -224,16 +248,25 @@ func _build_block(block: Node2D) -> void:
 		model = Props3D.wall(size, stone, height)
 	model.position = to_3d(block.global_position)
 	add_child(model)
-	if not Props3D.FIGURES.has(String(block.name)):
-		_register_if_tall(model)
-	if block.label != "" and block.get("show_label") != false and not Props3D.FIGURES.has(String(block.name)) \
+	if scene.name != "KeeperRoom" and block.label != "" and block.get("show_label") != false and not Props3D.FIGURES.has(String(block.name)) \
 			and block.label != "FORTRESS WALL":
 		_label(block.label, model.position + Vector3(0, 2.0, 0))
-	elif Props3D.FIGURES.has(String(block.name)):
+	elif Props3D.FIGURES.has(String(block.name)) and scene.name != "KeeperRoom":
 		_label(block.label, model.position + Vector3(0, 2.3, 0))
 
 
 func _build_marker(marker: Node2D) -> void:
+	if scene.name == "KeeperRoom":
+		if String(marker.name).begins_with("Stair"):
+			var levels := {"StairOne": 0.0, "StairTwo": 1.5, "StairThree": 3.0}
+			var stairs := Props3D.staircase(5.1)
+			stairs.name = marker.name + "3D"
+			stairs.position = to_3d(marker.position + Vector2(0, 48), levels[String(marker.name)])
+			add_child(stairs)
+			return
+		if marker.name == "BrokenWall":
+			_build_broken_exit(marker.position)
+			return
 	var size: Vector2 = marker.size * METRES_PER_PIXEL
 	var plate := MeshInstance3D.new()
 	var mesh := BoxMesh.new()
@@ -309,21 +342,30 @@ func _dress_surroundings() -> void:
 			# Red Hollow: round thatched huts beyond the compound walls.
 			for spot: Array in [[-2.5, -3.0, 2.0], [5.0, -4.5, 2.3], [12.0, -3.5, 1.8], [19.5, -4.2, 2.2],
 					[27.0, -2.0, 2.0], [-3.5, 6.0, 1.8], [27.5, 9.0, 2.1], [8.5, -8.0, 1.6], [16.0, -9.0, 2.0]]:
-				var hut := Props3D.round_hut(spot[2])
+				var hut := Civilisation3D.block(spot[2] * 1.8, spot[2] * 1.6, 2 + int(spot[0] + 20) % 2, int(spot[0] + 20))
 				hut.position = Vector3(spot[0], 0, spot[1])
 				hut.rotation.y = atan2(ROOM.x / 2.0 - spot[0], ROOM.y / 2.0 - spot[1])
 				add_child(hut)
+			var relay := Civilisation3D.relay(12.0)
+			relay.position = Vector3(12, 0, -13)
+			add_child(relay)
+			for location: Vector3 in [Vector3(12, 0, 4.8), Vector3(10.8, 0, 1.8)]:
+				var line := Civilisation3D.service_line(7.0)
+				line.position = location
+				if location.x < 12:
+					line.rotation.y = PI / 2.0
+				add_child(line)
 			_place("polypizza/baobab.glb", Vector3(-6.0, 0, -6.0), 7.0)
 			for i in 3:
 				_animal("polypizza/chicken.glb", "Idle_Peck", Vector3(14.0 + i * 1.3, 0, 10.5 - i * 0.8), 0.45, i * 1.7)
 			if String(scene.name) == "Cistern":
-				_animal("polypizza/donkey.glb", "Eating", Vector3(25.5, 0, 3.0), 1.9, -1.2)
+				_utility_carrier(Vector3(25.5, 0, 3.0), -1.2)
 		"AshRoad":
 			_place("polypizza/acacia.glb", Vector3(4.0, 0, -3.5), 6.0)
 			_place("polypizza/acacia.glb", Vector3(17.0, 0, -4.0), 7.0, 1.3)
 			_place("polypizza/savanna_tree.glb", Vector3(26.5, 0, 6.0), 4.0)
-			_animal("polypizza/donkey.glb", "Eating", Vector3(19.5, 0, 11.2), 1.9, 0.4)
-			_place("polypizza/cart_broken.glb", Vector3(10.5, 0, 12.6), 2.2, 0.3)
+			_utility_carrier(Vector3(19.5, 0, 11.2), 0.4)
+			_utility_carrier(Vector3(10.5, 0, 12.6), 0.3)
 		"Culvert":
 			_place("polypizza/acacia.glb", Vector3(-3.0, 0, 2.0), 6.0)
 			_place("polypizza/savanna_tree.glb", Vector3(27.0, 0, 10.0), 4.0, 2.0)
@@ -350,6 +392,8 @@ func _place(path: String, at: Vector3, fit: float, turn := 0.0) -> Node3D:
 
 func _animal(path: String, clip_suffix: String, at: Vector3, fit: float, turn := 0.0) -> void:
 	var holder := _place(path, at, fit, turn)
+	if path.ends_with("chicken.glb"):
+		holder.set_meta("reactive_chicken", true)
 	for player: AnimationPlayer in holder.find_children("", "AnimationPlayer", true, false):
 		for clip in player.get_animation_list():
 			if clip.ends_with(clip_suffix):
@@ -387,6 +431,8 @@ func _scatter_nature() -> void:
 		holder.rotation.y = rng.randf() * TAU
 		add_child(holder)
 		Props3D._model(holder, path, rng.randf_range(0.4, 0.9))
+		if not path.contains("rock"):
+			holder.set_meta("wind_plant", true)
 		placed += 1
 	# A few acacias along the far (top) edge, where they frame the scene without
 	# blocking the camera's view of Tavo.
@@ -405,12 +451,12 @@ func _scatter_nature() -> void:
 func _sync_player() -> void:
 	var player := scene.player
 	tavo.visible = player.visible
-	tavo.position = to_3d(player.global_position)
+	tavo.position = to_3d(player.global_position, keeper_height(player.global_position) if scene.name == "KeeperRoom" else 0.0)
 	var facing := player.facing
 	if facing.length() > 0.1:
 		var target := atan2(-facing.x, -facing.y)
 		tavo.rotation.y = lerp_angle(tavo.rotation.y, target, 0.25)
-	tavo.set_moving(player.velocity.length() > 10.0, player.velocity.length() / Player.SPEED)
+	tavo.set_moving(player.velocity.length() > 10.0, player.velocity.length() / Player.SPEED, player.velocity.length() > Player.SPEED * 0.8)
 	if player.health < _last_health:
 		tavo.play("hit")
 	_last_health = player.health
@@ -445,12 +491,14 @@ func _sync_flood() -> void:
 	var top := flood.level * METRES_PER_PIXEL
 	var bottom := ROOM.y + 0.5
 	(_flood.mesh as BoxMesh).size = Vector3(ROOM.x, 0.5, maxf(bottom - top, 0.01))
-	_flood.position = Vector3(ROOM.x / 2.0, 0.2, (top + bottom) / 2.0)
+	var water_top := maxf(0.25, (520.0 - flood.level) * 0.0125) if scene.name == "KeeperRoom" else 0.45
+	(_flood.mesh as BoxMesh).size.y = water_top + 0.5
+	_flood.position = Vector3(ROOM.x / 2.0, (water_top - 0.5) * 0.5, (top + bottom) / 2.0)
 
 
 func _sync_focus() -> void:
 	var target := scene.player.focus_target()
-	_focus_ring.visible = target != null and scene.player.active
+	_focus_ring.visible = target != null and scene.player.active and first_person == null
 	if target != null:
 		_focus_ring.position = to_3d(target.global_position, 0.05)
 		var radius := maxf(target.body_size.x, target.body_size.y) * METRES_PER_PIXEL * 0.5 + 0.35
@@ -458,7 +506,38 @@ func _sync_focus() -> void:
 
 
 func _update_camera(delta: float, snap := false) -> void:
-	var focus := to_3d(scene.player.global_position)
+	if _collapsing:
+		var center := tavo.position + Vector3.UP
+		camera.position = camera.position.lerp(center + Vector3(3.5, 2.0, 4.5), minf(delta * 8.0, 1.0))
+		camera.look_at(center, Vector3.UP)
+		return
+	if not _shot.is_empty():
+		var subject := scene.get_node_or_null(str(_shot.get("target", "Player"))) as Node2D
+		if subject != null:
+			var focus := to_3d(subject.global_position, float(_shot.get("height", 1.2)))
+			if _shot.has("bone"):
+				var figure := figure_for(str(_shot.get("target", "Player")))
+				if figure != null:
+					focus = figure.bone_position(str(_shot.bone))
+			var offset := Vector3(float(_shot.get("side", 1.4)), float(_shot.get("rise", 0.6)), float(_shot.get("distance", 3.0)))
+			var actor := figure_for(str(_shot.get("target", "Player")))
+			if actor != null:
+				if _shot.has("bone"):
+					var outward := focus - actor.global_position
+					outward.y = 0.0
+					outward = outward.normalized()
+					offset = outward * 0.25 + Vector3.UP * float(_shot.get("rise", 0.2)) - actor.global_basis.z * float(_shot.get("distance", 0.8))
+				else:
+					offset = actor.global_basis * Vector3(offset.x, offset.y, -offset.z)
+			camera.position = camera.position.lerp(focus + offset, 1.0 if snap else 1.0 - exp(-7.0 * delta))
+			camera.look_at(focus, Vector3.UP)
+			camera.fov = lerpf(camera.fov, float(_shot.get("fov", 44.0)), 0.2)
+			return
+	if first_person != null:
+		first_person.update_camera(delta, snap)
+		return
+	camera.fov = lerpf(camera.fov, 50.0, 0.15)
+	var focus := to_3d(scene.player.global_position, keeper_height(scene.player.global_position) if scene.name == "KeeperRoom" else 0.0)
 	focus.x = clampf(focus.x, 5.0, ROOM.x - 5.0)
 	focus.z = clampf(focus.z, 2.5, ROOM.y - 1.0)
 	var target := focus + CAMERA_OFFSET
@@ -474,6 +553,7 @@ func _update_camera(delta: float, snap := false) -> void:
 func _label(text: String, at: Vector3) -> Label3D:
 	var tag := Label3D.new()
 	tag.text = text
+	tag.visible = false
 	tag.position = at
 	tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	tag.pixel_size = 0.006
@@ -494,3 +574,156 @@ func _simple(mesh: Mesh, color: Color, position: Vector3) -> MeshInstance3D:
 	instance.material_override = material
 	instance.position = position
 	return instance
+
+
+func frame_shot(shot: Dictionary) -> void:
+	_shot = shot.duplicate()
+
+
+func end_shot() -> void:
+	_shot.clear()
+	if tavo != null:
+		tavo.play("idle")
+	if _speaking != null:
+		_speaking.play("idle")
+		_speaking = null
+
+
+func figure_for(node_name: String) -> CastFigure:
+	if node_name == "Tavo" or node_name == "Player":
+		return tavo
+	var model := get_node_or_null(node_name + "3D")
+	if model != null:
+		for child in model.get_children():
+			if child is CastFigure:
+				return child
+	return null
+
+
+func animate_speaker(node_name: String) -> void:
+	if _speaking != null:
+		_speaking.play("idle")
+	_speaking = figure_for(node_name)
+	if _speaking != null:
+		if _speaking._looping == "fix":
+			_speaking = null
+			return
+		_speaking.play("talk")
+		if _speaking != tavo:
+			var at := to_3d(scene.player.global_position, _speaking.global_position.y)
+			if _speaking.global_position.distance_to(at) > 0.1:
+				_speaking.look_at(at, Vector3.UP)
+
+
+func _build_story_props() -> void:
+	if scene.name == "Cistern":
+		var pipe := CylinderMesh.new()
+		pipe.top_radius = 0.1
+		pipe.bottom_radius = 0.1
+		pipe.height = 2.4
+		_carried_pipe = _simple(pipe, Color("#b0704a"), Vector3.ZERO)
+		_carried_pipe.rotation.z = PI / 2.0
+		add_child(_carried_pipe)
+
+
+func _sync_story_props(delta: float) -> void:
+	if scene.name == "Cistern":
+		var policy: String = GameState.get_flag("water_policy")
+		var count: int = {"": 12, "reserve": 12, "share": 6, "joint": 10}.get(policy, 12)
+		var jars := get_node_or_null("Jars3D")
+		if jars != null:
+			for i in jars.get_child_count():
+				(jars.get_child(i) as Node3D).visible = i < count
+		var repaired: bool = GameState.get_flag("sc03_repair_done")
+		var water := get_node_or_null("Spring3D/SpringWater") as Node3D
+		if water != null:
+			water.visible = repaired
+		_carried_pipe.visible = GameState.get_flag("sc03_pipe_taken")
+		_carried_pipe.position = to_3d(scene.get_node("Spring").position, 0.2) if repaired else tavo.position + Vector3(0, 1.1, 0)
+	elif scene.name == "ReedGate":
+		var brace := get_node_or_null("Brace3D") as Node3D
+		if brace != null:
+			brace.rotation.z = lerpf(brace.rotation.z, 0.0 if GameState.get_flag("sc07_braced") else 0.22, minf(delta * 5.0, 1.0))
+
+
+## Must match the visible tread tops and the existing zig-zag collision gaps.
+static func keeper_height(point: Vector2) -> float:
+	var level := 0
+	var edge := 400.0
+	if point.y < 160.0:
+		return 4.5
+	elif point.y < 280.0:
+		level = 2
+		edge = 160.0
+	elif point.y < 400.0:
+		level = 1
+		edge = 280.0
+	var on_stair := point.x >= 740.0 and point.x <= 944.0
+	if level == 1:
+		on_stair = point.x >= 16.0 and point.x <= 220.0
+	if on_stair and point.y < edge + 96.0:
+		return level * 1.5 + clampf(ceilf((edge + 96.0 - point.y) / 9.6), 0.0, 10.0) * 0.15
+	return level * 1.5
+
+
+func _build_keeper_landings() -> void:
+	for point: Vector3 in [Vector3(3, 3.5, 11), Vector3(12, 7.5, 4), Vector3(21, 5.5, 8)]:
+		var lamp := OmniLight3D.new()
+		lamp.position = point
+		lamp.light_color = Color("#f1cf9c") if point.x != 12 else Color("#b7d4e2")
+		lamp.light_energy = 3.5
+		lamp.omni_range = 15.0
+		add_child(lamp)
+	for i in 3:
+		var top := (i + 1) * 1.5
+		var back := 280.0 - i * 120.0 if i < 2 else 20.0
+		var front := 400.0 - i * 120.0
+		var slab := Props3D._box(self, Vector3(23.2, 0.22, (front - back) * METRES_PER_PIXEL), Color.WHITE,
+				to_3d(Vector2(480, (front + back) * 0.5), top - 0.11))
+		slab.name = "Landing%d" % (i + 1)
+		Props3D._skin(slab, "stone", Color("#a89f8b"))
+
+
+func _build_broken_exit(point: Vector2) -> void:
+	var root := Node3D.new()
+	root.name = "BrokenExit3D"
+	root.position = to_3d(point, 4.5)
+	add_child(root)
+	for side: float in [-1.0, 1.0]:
+		for i in 4:
+			var brick := Props3D._box(root, Vector3(0.55, 0.40, 0.5), Color.WHITE, Vector3(side * (1.4 + i * 0.07), 0.2 + i * 0.40, 0))
+			brick.rotation.z = side * i * 0.035
+			Props3D._skin(brick, "stone")
+	for i in 6:
+		var rubble := Props3D._box(root, Vector3(0.3, 0.18, 0.35), Color("#8d8679"), Vector3((i - 3) * 0.37, 0.08, -0.1 + (i % 2) * 0.25))
+		rubble.rotation.y = i * 0.7
+
+
+func begin_collapse() -> void:
+	_collapsing = true
+	_collapse_time = 0.0
+	tavo.play("hit")
+	var chunks := CPUParticles3D.new()
+	chunks.name = "FallingMasonry"
+	chunks.amount = 20
+	chunks.lifetime = 1.0
+	chunks.one_shot = true
+	chunks.explosiveness = 0.95
+	chunks.direction = Vector3(0, 0.3, 1)
+	chunks.spread = 75.0
+	chunks.initial_velocity_min = 1.0
+	chunks.initial_velocity_max = 3.0
+	chunks.gravity = Vector3(0, -16, 0)
+	var brick := BoxMesh.new()
+	brick.size = Vector3(0.22, 0.16, 0.25)
+	chunks.mesh = brick
+	chunks.material_override = Materials3D.get_material("stone")
+	chunks.position = tavo.position + Vector3(0, 0.1, -0.2)
+	add_child(chunks)
+
+
+func _utility_carrier(at: Vector3, turn: float) -> void:
+	var carrier := Civilisation3D.service_cart()
+	carrier.position = at
+	carrier.rotation.y = turn
+	add_child(carrier)

@@ -59,5 +59,5 @@ func _escape() -> void:
 
 func _objective() -> String:
 	if _escaping:
-		return "Climb the marked stair before the water reaches you."
+		return "Climb out."
 	return ""

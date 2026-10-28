@@ -24,39 +24,79 @@ static func build(object_name: String, size: Vector2) -> Node3D:
 		return root
 	match object_name:
 		"Well":
-			_skin(_cyl(root, 0.85, 0.95, 0.75, Color("#9a9288"), Vector3(0, 0.37, 0)), "stone")
-			_cyl(root, 0.62, 0.62, 0.77, Color("#1d2a33"), Vector3(0, 0.38, 0))
-			_cyl(root, 0.6, 0.6, 0.02, Color("#2c4a5e"), Vector3(0, 0.6, 0))
+			_cyl(root, 0.85, 0.95, 0.65, Color.WHITE, Vector3(0, 0.325, 0)).material_override = Materials3D.civic("shell")
+			_cyl(root, 0.93, 0.93, 0.12, Color.WHITE, Vector3(0, 0.66, 0)).material_override = Materials3D.civic("metal")
+			_cyl(root, 0.62, 0.62, 0.02, Color("#214b52"), Vector3(0, 0.73, 0))
+			_torus(root, 0.65, 0.72, Color.WHITE, Vector3(0, 0.74, 0)).material_override = Materials3D.civic("bronze")
+			for i in 4:
+				var angle := i * PI / 2.0
+				_box(root, Vector3(0.13, 0.6, 0.18), Color.WHITE, Vector3(cos(angle) * 0.87, 0.32, sin(angle) * 0.87)).material_override = Materials3D.civic("teal")
 		"Pump":
 			_cyl(root, 0.35, 0.4, 0.15, Color("#8a847a"), Vector3(0, 0.07, 0))
-			_cyl(root, 0.12, 0.13, 1.1, Color("#4d5a66"), Vector3(0, 0.6, 0))
-			_box(root, Vector3(0.08, 0.08, 0.35), Color("#3a444d"), Vector3(0, 0.95, -0.2))
+			_cyl(root, 0.12, 0.13, 1.1, Color.WHITE, Vector3(0, 0.6, 0)).material_override = Materials3D.civic("shell")
+			_box(root, Vector3(0.08, 0.08, 0.55), Color.WHITE, Vector3(0, 0.95, 0.30)).material_override = Materials3D.civic("bronze")
+			var outlet := _cyl(root, 0.055, 0.055, 0.13, Color.WHITE, Vector3(0, 0.90, 0.575))
+			outlet.material_override = Materials3D.civic("bronze")
+			var nozzle := Marker3D.new()
+			nozzle.name = "WaterOutlet"
+			nozzle.position = Vector3(0, 0.835, 0.575)
+			root.add_child(nozzle)
 			var handle := _box(root, Vector3(0.05, 0.05, 0.8), Color("#5f6b75"), Vector3(0, 1.25, 0.25))
+			handle.name = "PumpHandle"
 			handle.rotation.x = -0.5
+			_box(root, Vector3(0.40, 0.80, 0.34), Color.WHITE, Vector3(0.30, 0.52, 0)).material_override = Materials3D.civic("teal")
+			var status := _box(root, Vector3(0.28, 0.08, 0.02), Color.WHITE, Vector3(0.30, 0.80, 0.18))
+			status.name = "ServiceStatus"
+			status.material_override = Materials3D.civic("light")
+			var gauge := _cyl(root, 0.1, 0.1, 0.02, Color("#e4decd"), Vector3(0.3, 0.6, 0.18))
+			gauge.rotation.x = PI / 2.0
+			_box(root, Vector3(0.012, 0.12, 0.02), Color("#b54c38"), Vector3(0.3, 0.6, 0.205)).rotation.z = 0.35
 			_sphere(root, 0.07, Color("#c97a36"), Vector3(0, 1.15, 0))
 		"Basket":
-			# A woven basket: thatch texture on a tapered drum, tools sticking out.
-			_model(root, "kenney/survival/tool-hammer.glb", 0.5, Vector3(0.1, 0.35, 0), Vector3(0, 0, 0.6))
+			_box(root, Vector3(0.66, 0.36, 0.48), Color.WHITE, Vector3(0, 0.18, 0)).material_override = Materials3D.civic("teal")
+			_box(root, Vector3(0.55, 0.015, 0.37), Color.WHITE, Vector3(0, 0.37, 0)).material_override = Materials3D.civic("metal")
+			for side: float in [-1.0, 1.0]:
+				_box(root, Vector3(0.68, 0.07, 0.055), Color.WHITE, Vector3(0, 0.39, side * 0.24)).material_override = Materials3D.civic("shell")
+				_box(root, Vector3(0.055, 0.12, 0.48), Color.WHITE, Vector3(side * 0.33, 0.36, 0)).material_override = Materials3D.civic("bronze")
+			_model(root, "kenney/survival/tool-hammer.glb", 0.38, Vector3(0.08, 0.40, 0), Vector3(0, 0, 0.6))
 		"Bird":
 			_model(root, "kenney/survival/campfire-pit.glb", 0.9)
 			_cyl(root, 0.015, 0.015, 0.5, Color("#8a6a44"), Vector3(0, 0.45, 0))
-			_box(root, Vector3(0.5, 0.03, 0.12), Color("#c97a36"), Vector3(0, 0.72, 0))
-			_sphere(root, 0.07, Color("#d98a46"), Vector3(0, 0.74, 0))
+			var toy := Node3D.new()
+			toy.name = "CopperBird"
+			root.add_child(toy)
+			_ornament_wings(toy)
+			_sphere(toy, 0.07, Color("#d98a46"), Vector3(0, 0.74, 0))
 		"Home":
 			_house(root, size)
 		"ShadeCloth":
 			for corner: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(-1, 1), Vector2(1, 1)]:
 				_cyl(root, 0.05, 0.05, 2.2, Color("#6b4f33"), Vector3(corner.x * size.x * 0.45, 1.1, corner.y * size.y * 0.45))
-			var cloth := _box(root, Vector3(size.x, 0.04, size.y), Color("#e6dcc4"), Vector3(0, 2.15, 0))
-			cloth.rotation.x = 0.08
-		"Exit", "Door":
+			var fabric := PlaneMesh.new()
+			fabric.size = size
+			fabric.subdivide_width = 12
+			fabric.subdivide_depth = 6
+			var cloth := MeshInstance3D.new()
+			cloth.name = "WindCanopy"
+			cloth.mesh = fabric
+			cloth.position = Vector3(0, 2.15, 0)
+			var fabric_material := ShaderMaterial.new()
+			fabric_material.shader = load("res://assets/shaders/wind_cloth.gdshader")
+			cloth.material_override = fabric_material
+			root.add_child(cloth)
+		"Exit":
 			_model(root, "kenney/survival/signpost-single.glb", 1.0)
+		"Door":
+			_box(root, Vector3(1.2, 2.0, 0.12), Color("#17120e"), Vector3(0, 1.0, 0))
+			for side: float in [-1.0, 1.0]:
+				_skin(_box(root, Vector3(0.15, 2.15, 0.22), Color.WHITE, Vector3(side * 0.67, 1.075, 0)), "planks")
+			_skin(_box(root, Vector3(1.5, 0.18, 0.22), Color.WHITE, Vector3(0, 2.15, 0)), "planks")
 		"Cistern":
 			_skin(_box(root, Vector3(size.x, 1.1, size.y), Color("#8f8a82"), Vector3(0, 0.55, 0)), "stone")
 			_box(root, Vector3(size.x - 0.4, 0.04, size.y - 0.4), Color("#2c4a5e"), Vector3(0, 1.11, 0)).material_override = Materials3D.water()
 		"Jars":
-			for i in 4:
-				_model(root, "polypizza/pot_ceramic_large.glb", 0.6, Vector3((i - 1.5) * 0.66, 0, 0), Vector3(0, i * 1.3, 0))
+			for i in 12:
+				_model(root, "polypizza/pot_ceramic_large.glb", 0.5, Vector3((i % 4 - 1.5) * 0.55, 0, (i / 4) * 0.55), Vector3(0, i * 1.3, 0))
 		"Gate":
 			_skin(_box(root, Vector3(maxf(size.x, 0.3), 2.2, size.y), Color("#6b4f33"), Vector3(0, 1.1, 0)), "planks")
 			for z in [-0.35, 0.0, 0.35]:
@@ -72,13 +112,18 @@ static func build(object_name: String, size: Vector2) -> Node3D:
 			pipe.rotation.z = PI / 2.0
 		"Spring":
 			_model(root, "kenney/nature/path_stoneCircle.glb", size.x + 0.4)
-			_cyl(root, size.x * 0.32, size.x * 0.32, 0.03, Color("#2e5a70"), Vector3(0, 0.06, 0))
+			_cyl(root, size.x * 0.32, size.x * 0.32, 0.03, Color("#2e5a70"), Vector3(0, 0.06, 0)).name = "SpringWater"
 		"Workbench":
 			_model(root, "kenney/survival/workbench-anvil.glb", 1.5)
 		"Hearth":
 			_model(root, "kenney/nature/campfire_stones.glb", size.x * 0.9)
 		"Bag":
-			_model(root, "kenney/survival/chest.glb", 0.7)
+			var leather := _sphere(root, 0.3, Color("#784c2e"), Vector3(0, 0.28, 0))
+			leather.scale = Vector3(1.2, 0.85, 0.5)
+			_box(root, Vector3(0.58, 0.16, 0.15), Color("#63391f"), Vector3(0, 0.43, 0.02))
+			_box(root, Vector3(0.05, 0.12, 0.025), Color("#b78c43"), Vector3(0, 0.36, 0.105))
+			var strap := _torus(root, 0.24, 0.265, Color("#49301f"), Vector3(0, 0.55, 0))
+			strap.rotation.x = PI / 2.0
 		"CoolStone":
 			var boulder := _skin(_sphere(root, size.x * 0.5, Color.WHITE, Vector3(0, size.x * 0.2, 0)), "stone", Color(0.9, 0.82, 0.75))
 		"Shade":
@@ -136,42 +181,31 @@ static func build(object_name: String, size: Vector2) -> Node3D:
 
 
 ## Wall-like blocks: low mud-brick for town walls, stone for fortress walls and ledges.
-static func wall(size: Vector2, stone: bool, height := 1.1) -> Node3D:
+static func wall(size: Vector2, _stone: bool, height := 1.1) -> Node3D:
 	var root := Node3D.new()
-	var color := Color("#8f8576") if stone else Color("#a8714a")
-	_skin(_box(root, Vector3(size.x, height, size.y), color, Vector3(0, height / 2.0, 0)), "stone" if stone else "mud_brick")
-	_skin(_box(root, Vector3(size.x + 0.06, 0.08, size.y + 0.06), color.darkened(0.15), Vector3(0, height, 0)), "stone" if stone else "plaster", Color(0.85, 0.8, 0.75))
+	_box(root, Vector3(size.x, height, size.y), Color.WHITE, Vector3(0, height * 0.5, 0)).material_override = Materials3D.civic("shell")
+	_box(root, Vector3(size.x + 0.05, 0.12, size.y + 0.05), Color.WHITE, Vector3(0, 0.06, 0)).material_override = Materials3D.civic("metal")
+	_box(root, Vector3(size.x + 0.06, 0.07, size.y + 0.06), Color.WHITE, Vector3(0, height, 0)).material_override = Materials3D.civic("teal")
+	for i in int(size.x / 2.0):
+		_box(root, Vector3(0.025, height, size.y + 0.02), Color.WHITE, Vector3(-size.x * 0.5 + 1.0 + i * 2.0, height * 0.5, 0)).material_override = Materials3D.civic("bronze")
+	Civilisation3D.batch(root)
 	return root
+
 
 
 static func _house(root: Node3D, size: Vector2) -> void:
-	var wall_height := 2.4
-	_skin(_box(root, Vector3(size.x, wall_height, size.y), Color("#a8714a"), Vector3(0, wall_height / 2.0, 0)), "plaster", Color(1.0, 0.85, 0.72))
-	_box(root, Vector3(0.8, 1.7, 0.05), Color("#3a2618"), Vector3(0, 0.85, size.y / 2.0 + 0.02))
-	# Thatched roof: a four-sided cone over the walls.
-	var roof := _cyl(root, 0.0, maxf(size.x, size.y) * 0.78, 1.6, Color("#b89a5a"), Vector3(0, wall_height + 0.8, 0), 4)
-	roof.rotation.y = PI / 4.0
-	roof.scale = Vector3(size.x / maxf(size.x, size.y), 1.0, size.y / maxf(size.x, size.y))
+	root.add_child(Civilisation3D.block(size.x, size.y, 2, 1))
 
 
-## A round mud hut with a conical thatched roof, as in Zambian villages: plastered
-## walls, a low doorway, a thatch cone with a little overhang.
+## Kept as a compatibility entry point for earlier scene-dressing scripts.
 static func round_hut(radius: float) -> Node3D:
-	var root := Node3D.new()
-	var wall_height := radius * 0.85
-	_skin(_cyl(root, radius, radius * 1.03, wall_height, Color.WHITE, Vector3(0, wall_height / 2.0, 0), 20), "plaster", Color(1.0, 0.86, 0.74))
-	_box(root, Vector3(radius * 0.45, wall_height * 0.75, 0.1), Color("#2a1a10"), Vector3(0, wall_height * 0.37, radius - 0.02))
-	var roof := _cyl(root, 0.02, radius * 1.32, radius * 1.05, Color.WHITE, Vector3(0, wall_height + radius * 0.5, 0), 20)
-	_skin(roof, "thatch")
-	return root
+	return Civilisation3D.block(radius * 1.8, radius * 1.6, 2)
 
 
-static func _cart(root: Node3D, size: Vector2) -> void:
-	_skin(_box(root, Vector3(size.x, 0.5, size.y), Color("#8a6a44"), Vector3(0, 0.75, 0)), "planks")
-	for x: float in [-0.3, 0.3]:
-		var wheel := _cyl(root, 0.4, 0.4, 0.1, Color("#4a3424"), Vector3(x * size.x, 0.4, size.y / 2.0 + 0.06))
-		wheel.rotation.x = PI / 2.0
-	_box(root, Vector3(0.08, 0.08, 1.0), Color("#5a4229"), Vector3(-size.x / 2.0 - 0.4, 0.6, 0)).rotation.y = PI / 2.0
+
+static func _cart(root: Node3D, _size: Vector2) -> void:
+	root.add_child(Civilisation3D.service_cart())
+
 
 
 ## Loads a Kenney model and scales it so its footprint's longer side is `fit` metres.
@@ -299,3 +333,74 @@ static func _add(root: Node3D, mesh: Mesh, color: Color, position: Vector3) -> M
 	instance.position = position
 	root.add_child(instance)
 	return instance
+
+
+## A real stair flight. Each tread rises 15 cm and runs 24 cm in the keeper room.
+static func staircase(width: float, rise := 1.5, depth := 2.4, count := 10) -> Node3D:
+	var root := Node3D.new()
+	root.name = "StairFlight"
+	for i in count:
+		var top: float = rise * (i + 1) / count
+		var z: float = depth * 0.5 - depth * (i + 0.5) / count
+		var step := _box(root, Vector3(width, top, depth / count + 0.008), Color.WHITE, Vector3(0, top * 0.5, z))
+		step.name = "Tread%02d" % (i + 1)
+		step.material_override = Materials3D.civic("shell")
+		_box(root, Vector3(width, 0.025, 0.035), Color("#c5b89b"), Vector3(0, top + 0.012, z + depth / count * 0.4))
+	for side: float in [-1.0, 1.0]:
+		for i in [0, 3, 6, 9]:
+			var top: float = rise * (i + 1) / count
+			_cyl(root, 0.025, 0.035, 0.8, Color("#b28d5b"), Vector3(side * (width * 0.5 - 0.08), top + 0.4, depth * 0.5 - depth * (i + 0.5) / count))
+		var start := Vector3(side * (width * 0.5 - 0.08), 0.15 + 0.8, depth * 0.45)
+		var end := Vector3(start.x, rise + 0.8, -depth * 0.45)
+		var rail := _cyl(root, 0.032, 0.032, start.distance_to(end), Color("#b28d5b"), (start + end) * 0.5)
+		rail.quaternion = Quaternion(Vector3.UP, (end - start).normalized())
+	return root
+
+
+## A recognisable structural arch, batched into one stone mesh for mobile.
+static func ruined_arch() -> Node3D:
+	var root := Node3D.new()
+	root.name = "RuinedArcade"
+	for side: float in [-1.0, 1.0]:
+		_box(root, Vector3(1.15, 5.5, 1.4), Color.WHITE, Vector3(side * 3.0, 2.75, 0))
+		_box(root, Vector3(1.6, 0.3, 1.8), Color.WHITE, Vector3(side * 3.0, 5.4, 0))
+	for i in 11:
+		var angle := PI * (i + 0.5) / 11.0
+		var stone := _box(root, Vector3(0.92, 0.85, 1.4), Color.WHITE, Vector3(cos(angle) * 3.0, 5.5 + sin(angle) * 3.0, 0))
+		stone.rotation.z = angle - PI / 2.0
+	var surface := SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var bounds: Array[AABB] = []
+	var shapes: Array[Dictionary] = []
+	for child: MeshInstance3D in root.get_children():
+		bounds.append(child.transform * child.mesh.get_aabb())
+		shapes.append({"bounds": child.mesh.get_aabb(), "transform": child.transform})
+		surface.append_from(child.mesh, 0, child.transform)
+		root.remove_child(child)
+		child.free()
+	var combined := MeshInstance3D.new()
+	combined.mesh = surface.commit()
+	root.set_meta("collision_boxes", bounds)
+	root.set_meta("collision_shapes", shapes)
+	combined.material_override = Materials3D.civic("shell")
+	root.add_child(combined)
+	return root
+
+
+static func _ornament_wings(root: Node3D) -> void:
+	var outline := PackedVector2Array([Vector2(-0.38, 0.10), Vector2(-0.25, -0.12), Vector2(-0.10, -0.10),
+		Vector2(0, -0.025), Vector2(0.10, -0.10), Vector2(0.25, -0.12), Vector2(0.38, 0.10),
+		Vector2(0.18, 0.04), Vector2(0, 0.13), Vector2(-0.18, 0.04)])
+	var indices := Geometry2D.triangulate_polygon(outline)
+	var surface := SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for index in indices:
+		var point := outline[index]
+		surface.add_vertex(Vector3(point.x, 0.72, point.y))
+	surface.generate_normals()
+	var wings := MeshInstance3D.new()
+	wings.mesh = surface.commit()
+	var copper := Materials3D.copper().duplicate() as StandardMaterial3D
+	copper.cull_mode = BaseMaterial3D.CULL_DISABLED
+	wings.material_override = copper
+	root.add_child(wings)

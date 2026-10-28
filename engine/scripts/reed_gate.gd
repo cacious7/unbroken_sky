@@ -51,9 +51,9 @@ func _on_used(target: Interactable) -> void:
 
 func _objective() -> String:
 	if GameState.get_flag("sc07_braced"):
-		return "Turn Sena's key in the sluice lock."
+		return "Use the key."
 	if GameState.get_flag("sc07_drained"):
-		return "Shift the brace under the cracked gate."
+		return "Brace the gate."
 	if GameState.get_flag("sc07_arrived"):
-		return "Make the wheel safe to remove: drain the side channel first."
+		return "Drain the channel."
 	return ""

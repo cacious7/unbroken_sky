@@ -42,6 +42,8 @@ func _ready() -> void:
 	await _test_prologue()
 	await _test_sc02_sequence()
 	await _test_sc02_resume()
+	await _test_dialogue_input()
+	await _test_delivery_modes()
 	await _test_tap_to_walk()
 	await _test_pathfinding()
 	await _test_combat_controls()
@@ -56,6 +58,9 @@ func _ready() -> void:
 	await _test_sc06()
 	await _test_sc07()
 	await _test_sc08()
+	await _test_stairs_and_fall()
+	await _test_world_reactions_and_wind()
+	await _test_first_person_controls()
 	await _test_sc10()
 	await _test_full_chapter()
 	_test_test_rooms()
@@ -86,7 +91,7 @@ func _test_dialogue_files() -> void:
 		for conversation_id: String in conversations:
 			for line: Dictionary in conversations[conversation_id]:
 				var line_id: String = line.get("id", "")
-				if line_id == "" or ids.has(line_id) or str(line.get("text", "")) == "":
+				if line_id == "" or ids.has(line_id) or (str(line.get("text", "")) == "" and not line.has("stage")):
 					problems.append("bad id/text: %s" % line_id)
 				ids[line_id] = true
 				if line.has("sfx") and not Sfx.SOUNDS.has(line.sfx):
@@ -152,7 +157,7 @@ func _test_save_recovery() -> void:
 			"out-of-range pump count is clamped and kept consistent")
 	_write_save('{"version": 1, "flags": {"water_policy": "steal", "scene_id": "SC99"}}')
 	GameState.load_game()
-	_check(GameState.get_flag("water_policy") == "" and GameState.get_flag("scene_id") == "SC01",
+	_check(GameState.get_flag("water_policy") == "" and GameState.get_flag("scene_id") == "SC02",
 			"illegal water policy or scene id resets safely")
 	GameState.new_game()
 	GameState.set_flag("sc02_pin_collected", true)
@@ -233,7 +238,7 @@ func _spawn_prologue(instant := true) -> Node:
 
 func _test_prologue() -> void:
 	GameState.new_game()
-	_check(GameState.get_flag("scene_id") == "SC01", "a new game starts with the SC01 prologue")
+	_check(GameState.get_flag("scene_id") == "SC02", "a new game starts in the playable pump emergency")
 	var prologue := await _spawn_prologue()
 	_check(GameState.get_flag("scene_id") == "SC02", "SC01: the prologue plays through to SC02")
 	await _close(prologue)
@@ -777,7 +782,7 @@ func _test_full_chapter() -> void:
 			"SC10":
 				await _use(scene, "Bypass")
 		await _close(scene)
-	_check(visited == ["SC01", "SC02", "SC03", "SC04", "SC05", "SC06", "SC07", "SC08", "SC09", "SC10"],
+	_check(visited == ["SC02", "SC03", "SC04", "SC05", "SC06", "SC07", "SC08", "SC09", "SC10"],
 			"full chapter: every scene hands over to the next in order %s" % [visited])
 	_check(GameState.get_flag("sc10_complete") and GameState.get_flag("water_policy") == "joint"
 			and GameState.get_flag("water_compact") and GameState.get_flag("eagle_unlocked")
@@ -814,3 +819,300 @@ func _test_sc03_resume() -> void:
 	_check(not cistern.get_node("Pipe").visible and cistern.get_node("Spring").visible
 			and not GameState.get_flag("sc03_complete"), "joint repair resumes with the pipe in hand")
 	await _close(cistern)
+
+
+# Native input, including the final gesture that hands controls back to gameplay.
+func _test_dialogue_input() -> void:
+	GameState.new_game()
+	var yard := await _spawn(WELL_YARD)
+	yard.touch.device_has_touch = true
+	yard.touch.set_shown(true)
+	yard.dialogue.auto_finish = false
+	yard.player.walk_to(Vector2(350, 320))
+	yard._say("inspect_bird")
+	_check(not yard.player.is_walking() and not yard.player.active,
+			"dialogue: opening immediately cancels an existing walk")
+	var before := yard.player.position
+	var finger := InputEventScreenTouch.new()
+	finger.index = 2
+	finger.position = Vector2(400, 200)
+	finger.pressed = true
+	get_viewport().push_input(finger, true)
+	_check(yard.dialogue.is_open() and yard.dialogue._text.visible_characters == -1,
+			"dialogue: native touch reveals text without skipping it")
+	finger = finger.duplicate()
+	finger.pressed = false
+	get_viewport().push_input(finger, true)
+	finger = finger.duplicate()
+	finger.pressed = true
+	get_viewport().push_input(finger, true)
+	_check(not yard.dialogue.is_open() and yard.player.active,
+			"dialogue: next touch closes the final line")
+	var drag := InputEventScreenDrag.new()
+	drag.index = 2
+	drag.position = Vector2(450, 200)
+	get_viewport().push_input(drag, true)
+	finger = finger.duplicate()
+	finger.pressed = false
+	get_viewport().push_input(finger, true)
+	await _physics_frames(3)
+	_check(not yard.player.is_walking() and yard.player.position.is_equal_approx(before),
+			"dialogue: final touch, drag and release never move the player")
+	yard._say("inspect_well")
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.position = Vector2(400, 200)
+	click.pressed = true
+	get_viewport().push_input(click, true)
+	click = click.duplicate()
+	click.pressed = false
+	get_viewport().push_input(click, true)
+	click = click.duplicate()
+	click.pressed = true
+	get_viewport().push_input(click, true)
+	await _physics_frames(2)
+	_check(not yard.dialogue.is_open() and not yard.player.is_walking(),
+			"dialogue: mouse clicks advance without starting a walk")
+	await _use(yard, "Basket")
+	_check(not yard.dialogue.is_open() and yard._pin.visible == false,
+			"SC02: collecting the visible pin needs no dialogue dismissal")
+	await _use(yard, "Pump")
+	_check(yard._repair != null and not GameState.get_flag("sc02_pump_repaired"),
+			"SC02: repairing starts a hands-on challenge, not a text box")
+	var repair_results: Array[bool] = []
+	yard._repair.tapped.connect(func(success: bool) -> void: repair_results.append(success))
+	yard._repair.phase = 0.0
+	yard._repair.strike()
+	_check(yard._repair.hits == 0 and yard._repair.window_half_width() > 0.12,
+			"SC02: a missed repair tap widens the window without losing progress")
+	yard._repair.phase = 0.32
+	yard._repair.strike()
+	yard._repair.phase = 0.32
+	var repair_finger := InputEventScreenTouch.new()
+	repair_finger.index = 5
+	repair_finger.position = Vector2(480, 440)
+	repair_finger.pressed = true
+	get_viewport().push_input(repair_finger, true)
+	_check(not yard.player.active,
+			"SC02: completing a repair keeps input until the final finger is released")
+	repair_finger = repair_finger.duplicate()
+	repair_finger.pressed = false
+	get_viewport().push_input(repair_finger, true)
+	await _settle()
+	_check(repair_results == [false, true, true], "SC02: each repair tap reports its actual result once")
+	_check(not yard._flow.stream.visible and yard._status_material.albedo_color == Color("#8cddd1"),
+			"SC02: seating the pin stops the leak and restores the service indicator")
+	_check(yard._pin.visible and not yard.dialogue.is_open(),
+			"SC02: fitted pin is visible without a modal explanation")
+	await _use(yard, "Pump")
+	_check(yard._flow.stream.visible, "SC02: working the repaired pump produces a stream at the spout")
+	_check(yard._water.visible and yard._water_material.albedo_color == Color("#72bccc"),
+			"SC02: first pull shows clear water")
+	await _use(yard, "Pump")
+	_check(yard._water_material.albedo_color == Color("#161416") and not yard.dialogue.is_open(),
+			"SC02: second pull visibly turns water black without dialogue")
+	await _close(yard)
+
+
+func _test_delivery_modes() -> void:
+	GameState.new_game()
+	var yard := await _spawn(WELL_YARD)
+	yard.dialogue.auto_finish = false
+	yard._say("intro")
+	_check(yard.player.active and not yard._busy,
+			"ambient: speech leaves movement and interactions available")
+	yard.use(yard.get_node("Basket"))
+	await _settle()
+	_check(GameState.get_flag("sc02_pin_collected") and yard.player.active,
+			"ambient: a useful action works while someone is talking")
+	yard._say("mera")
+	_check(not yard.player.active and not yard.world_view._shot.is_empty(),
+			"cinematic: a silent wrist shot owns the camera and controls")
+	var pause_click := InputEventMouseButton.new()
+	pause_click.button_index = MOUSE_BUTTON_LEFT
+	pause_click.position = Vector2(916, 36)
+	pause_click.pressed = true
+	get_viewport().push_input(pause_click, true)
+	pause_click = pause_click.duplicate()
+	pause_click.pressed = false
+	get_viewport().push_input(pause_click, true)
+	_check(yard.pause_menu.is_open(), "cinematic: pause remains clickable above the input blocker")
+	yard.pause_menu.close()
+	yard.dialogue.skip_scene()
+	_check(yard.player.active and yard.world_view._shot.is_empty(),
+			"cinematic: skip immediately restores the gameplay camera and controls")
+	yard.dialogue._conversations["missing_voice"] = [{"id": "missing_voice_probe", "delivery": "ambient", "speaker": "SENA", "text": "Ready?", "duration": 0.01, "voice": "res://assets/voices/not_recorded.ogg"}]
+	yard._say("missing_voice")
+	yard.dialogue._process(0.02)
+	_check(not yard.dialogue.is_open() and yard.player.active,
+			"voice: missing recordings use timed subtitles and never stall the game")
+	yard.dialogue.load_file("res://data/dialogue/sc03.json")
+	yard._say("choice")
+	_check(yard.dialogue._choosing and not yard.dialogue._skip.visible,
+			"choices: consequential decisions never auto-select or offer scene skip")
+	yard.dialogue._process(60.0)
+	_check(yard.dialogue._choosing and GameState.get_flag("water_policy") == "",
+			"choices: waiting does not choose a water policy")
+	yard.dialogue.cancel()
+	await _close(yard)
+
+
+func _test_stairs_and_fall() -> void:
+	_start_at("SC08")
+	var room := await _spawn(KEEPER_ROOM)
+	var heights: Array[float] = []
+	for point: Vector2 in [Vector2(842, 450), Vector2(118, 330), Vector2(842, 210)]:
+		room.player.position = point
+		await _settle()
+		room.world_view._update_camera(0.0, true)
+		var height := room.world_view.tavo.position.y
+		heights.append(height)
+		var screen := room.world_view.camera.unproject_position(WorldView.to_3d(point, height))
+		var tapped: Variant = room.world_view.screen_to_world_2d(screen)
+		_check(tapped != null and (tapped as Vector2).distance_to(point) < 0.1,
+				"stairs: tapping an elevated tread maps back to that tread")
+	_check(is_equal_approx(WorldView.keeper_height(Vector2(752, 450)), 0.75)
+			and is_equal_approx(WorldView.keeper_height(Vector2(208, 330)), 2.25),
+			"stairs: the narrow navigation routes stay on visible treads")
+	_check(heights == [0.75, 2.25, 3.75], "stairs: the player visibly climbs all three flights")
+	var flight_root: Node3D = room.world_view.get_node("StairThree3D")
+	var tread: MeshInstance3D = flight_root.get_node("Tread10")
+	_check(is_equal_approx(flight_root.position.y + tread.position.y + tread.mesh.get_aabb().end.y, 4.5),
+			"stairs: the final physical tread meets the upper landing")
+	await _close(room)
+	_start_at("SC09")
+	var flight: Node3D = FLIGHT.instantiate()
+	add_child(flight)
+	await _settle()
+	var initial: float = flight.tavo.position.y
+	_check(flight._transforming and initial > flight.perch_position(0).y + 7.0,
+			"fall: the human begins visibly above the landing")
+	await _physics_frames(20)
+	_check(flight.tavo.position.y < initial - 0.1 and flight.tavo.scale == Vector3.ONE,
+			"fall: the body accelerates downwards at full size")
+	flight.dialogue.skip_scene()
+	await _settle()
+	_check(not flight._transforming and flight.eagle.grounded and flight.tavo.scale == Vector3.ONE,
+			"fall: skip resolves the transformation and restores a usable perch")
+	await _close(flight)
+
+
+func _test_world_reactions_and_wind() -> void:
+	GameState.new_game()
+	var yard := await _spawn(WELL_YARD)
+	var life: Node3D = yard.world_view._life
+	var terrain: MeshInstance3D = life.get_node("SurroundingHills")
+	var normals: PackedVector3Array = terrain.mesh.surface_get_arrays(0)[Mesh.ARRAY_NORMAL]
+	_check(normals[(15 * 32 + 15) * 6].y > 0.9,
+			"village: terrain faces upward and cannot reveal the sky through its backfaces")
+	_check(life.animals.size() == 3, "village: three chickens have live reactions")
+	var animal: Dictionary = life.animals[0]
+	var chicken := animal.node as Node3D
+	var home := chicken.position
+	yard.player.position = Vector2(home.x - 0.5, home.z) / 0.025
+	await _settle()
+	_check(chicken.position.distance_to(home) > 0.01 and animal.panic > 0.0,
+			"village: approaching a chicken makes it run away without opening dialogue")
+	yard.use(yard.get_node("Bird"))
+	await _settle()
+	_check(not yard.dialogue.is_open() and yard.player.active,
+			"village: playing with the copper bird keeps gameplay active")
+	await _close(yard)
+	_start_at("SC09")
+	var flight := await _spawn_flight()
+	await flight.takeoff()
+	flight.stamina = 3.0
+	var gate: Dictionary = flight.course.gates[0]
+	var center: Vector3 = gate.position
+	var normal: Vector3 = gate.normal
+	_check(flight.course.sweep_collect(center - normal * 4.0, center + normal * 4.0) == 1,
+			"wind: a swept pass catches a gate even across a long frame")
+	_check(flight.stamina > 5.0 and flight._boost_left > 0.0,
+			"wind: a clean pass restores wings and grants a short boost")
+	_check(flight.course.sweep_collect(center - normal * 4.0, center + normal * 4.0) == 0,
+			"wind: one gate cannot be farmed repeatedly in the same attempt")
+	var second: Dictionary = flight.course.gates[1]
+	var target: Vector3 = second.position
+	var heading: Vector3 = second.normal
+	_check(flight.course.sweep_collect(target + heading * 4.0, target - heading * 4.0) == 0,
+			"wind: flying backwards does not count as a gate pass")
+	var bounds: AABB = flight._obstacles[0].bounds
+	var middle := bounds.get_center()
+	_check(flight.hits_ruin(middle - Vector3(bounds.size.x + 1.0, 0, 0), middle + Vector3(bounds.size.x + 1.0, 0, 0)),
+			"flight: swept movement collides with solid ruins")
+	var arcade: Node3D = flight.get_children().filter(func(n: Node) -> bool: return n.has_meta("collision_shapes"))[0]
+	_check(not flight.hits_ruin(arcade.transform * Vector3(0, 6.6, -1.4), arcade.transform * Vector3(0, 6.6, 1.4)),
+			"flight: the open middle of an arch stays flyable")
+	flight._fall()
+	_check(flight.course.current_count() == 0 and not flight.is_flying() and flight._boost_left == 0.0,
+			"wind: retry rearms the current leg and clears stale boost")
+	await _close(flight)
+
+
+func _test_first_person_controls() -> void:
+	GameState.new_game()
+	var yard := await _spawn(WELL_YARD)
+	var rig: Node3D = yard.world_view.first_person
+	var camera := yard.world_view.camera
+	_check(yard.player.first_person_controls and Vector2(camera.position.x, camera.position.z).distance_to(yard.player.position * 0.025) < 0.01
+			and absf(camera.position.y - 1.68) < 0.02,
+			"first person: the camera is at the player's eyes, not above or behind")
+	_check(rig._body_geometry[0].cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY,
+			"first person: the body casts a shadow without drawing inside the camera")
+	yard.touch.device_has_touch = true
+	yard.touch.set_shown(true)
+	var before := yard.player.position
+	var press := InputEventScreenTouch.new()
+	press.index = 30
+	press.position = Vector2(700, 250)
+	press.pressed = true
+	get_viewport().push_input(press, true)
+	var drag := InputEventScreenDrag.new()
+	drag.index = 30
+	drag.position = Vector2(740, 250)
+	drag.relative = Vector2(40, 0)
+	get_viewport().push_input(drag, true)
+	press = press.duplicate()
+	press.pressed = false
+	get_viewport().push_input(press, true)
+	await _physics_frames(2)
+	_check(rig.yaw < -0.1 and yard.player.position.is_equal_approx(before) and not yard.player.is_walking(),
+			"first person: right-thumb look turns the view without moving or tap-walking")
+	rig.yaw = -PI / 2.0
+	rig._process(0.0)
+	yard.player.touch_vector = Vector2.UP
+	_check(yard.player._input_vector().x > 0.99,
+			"first person: forward movement follows the direction of view")
+	yard.player.touch_vector = Vector2.ZERO
+	yard.player.position = Vector2(470, 230)
+	await _physics_frames(3)
+	yard.player._update_focus()
+	_check(yard.player.focus_target() != null and yard.player.focus_target().name == "Pump",
+			"first person: looking right selects the pump in front")
+	rig.yaw = PI / 2.0
+	rig._process(0.0)
+	yard.player._update_focus()
+	_check(yard.player.focus_target() != null and yard.player.focus_target().name == "Well",
+			"first person: an object behind the player cannot steal the interaction")
+	var source := yard.player.position + Vector2(50, 0)
+	_check(yard.player.take_hit(source) and rig._damage_source == source and rig._damage_left > 0,
+			"first person: an accepted hit records the attack direction")
+	rig._process(0.25)
+	var damage_left: float = rig._damage_left
+	_check(not yard.player.take_hit(source + Vector2(10, 10)) and rig._damage_left == damage_left,
+			"first person: grace-period hits do not replace the damage direction")
+	rig._on_struck("miss")
+	_check(rig._hit_left == 0, "first person: a missed swing has no hit confirmation")
+	rig._on_struck("break")
+	_check(rig._hit_left > 0 and rig._hit_color == Color("#edc57d"),
+			"first person: breaking a connector confirms a successful strike")
+	rig._process(1.1)
+	_check(rig._damage_left == 0 and rig._hit_left == 0, "first person: combat cues expire without lingering")
+	yard.dialogue.auto_finish = false
+	yard._say("inspect_well")
+	var held_yaw: float = rig.yaw
+	rig.look_delta(Vector2(100, 0))
+	_check(rig.yaw == held_yaw and yard.touch._look_index == -1,
+			"first person: dialogue clears held look and blocks camera gestures")
+	yard.dialogue.cancel()
+	await _close(yard)

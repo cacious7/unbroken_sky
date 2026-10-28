@@ -77,8 +77,8 @@ position = Vector2(220, 400)
 script = ExtResource("3_inter")
 body_size = Vector2(38, 26)
 color = Color(0.55, 0.4, 0.2, 1)
-label = "TOOL BASKET"
-prompt = "Search the basket"
+label = "PARTS CADDY"
+prompt = "Search the parts caddy"
 
 [node name="Bird" type="Area2D" parent="."]
 position = Vector2(740, 270)

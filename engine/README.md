@@ -1,6 +1,6 @@
 # The Unbroken Sky: Godot project
 
-Godot 4.7.2 (standard build), GDScript, Compatibility renderer, 960×540 design canvas, landscape. Story canon lives in `../Game Concept/`; the release plan is `../Game Concept/development/LAUNCH_PLAN.md`.
+Godot 4.7.2 (standard build), GDScript, Mobile renderer, 960×540 design canvas, landscape. Story canon lives in `../Game Concept/`; the release plan is `../Game Concept/development/LAUNCH_PLAN.md`.
 
 ## Layout
 
@@ -24,10 +24,13 @@ godot --headless --path . --export-debug "Android" build/android/unbroken_sky_de
 godot --headless --path . --export-release "Web" build/web/index.html
 ```
 
-Controls (all work together; any direct movement cancels a tap-walk):
-- Keyboard: WASD or arrow keys to move; E, Space or Enter to interact and advance dialogue.
-- Mouse: click the ground to walk there; click an object or person to walk to it and use it.
-- Touch: tap the ground or an object as with the mouse; press and drag on the left half for a floating stick; USE button bottom right; tap anywhere to advance dialogue.
+Controls (first-person gameplay, updated 28 October 2026):
+
+- Desktop: mouse look, WASD/arrows move relative to view; E or left click uses the aimed nearby object; J/F strikes and K/Shift dodges. Escape releases the pointer and opens pause.
+- Mobile: left-thumb movement, right-thumb look, contextual USE/STRIKE and DODGE buttons. Empty taps do not walk the player.
+- Dialogue owns taps while open. Flight uses a forward first-person view and its existing steering controls. Short authored story shots remain available.
+
+The headings below are historical implementation notes; the current art and camera direction is in ../docs/FUTURISTIC_FIRST_PERSON_DIRECTION.md.
 
 ## Toolchain on this machine
 

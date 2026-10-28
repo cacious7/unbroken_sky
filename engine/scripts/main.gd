@@ -56,7 +56,7 @@ func _ready() -> void:
 		var rooms := HBoxContainer.new()
 		rooms.alignment = BoxContainer.ALIGNMENT_CENTER
 		rooms.add_theme_constant_override("separation", 10)
-		for room: Array in [["Test: husk fight", "SC05"], ["Test: eagle flight", "SC09"]]:
+		for room: Array in [["Test: husk fight", "SC05"], ["Test: stair escape", "SC08"], ["Test: eagle flight", "SC09"]]:
 			var button := _button(room[0], GameState.start_test_room.bind(room[1]))
 			button.custom_minimum_size = Vector2(200, 44)
 			button.add_theme_font_size_override("font_size", 16)
@@ -103,9 +103,9 @@ func _show_credits() -> void:
 
 func _continue() -> void:
 	GameState.load_game()
-	get_tree().change_scene_to_file(GameState.current_scene_path())
+	GameState.go_to(GameState.get_flag("scene_id"))
 
 
 func _new_game() -> void:
 	GameState.new_game()
-	get_tree().change_scene_to_file(GameState.current_scene_path())
+	GameState.go_to(GameState.get_flag("scene_id"))

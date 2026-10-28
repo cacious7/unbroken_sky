@@ -4,6 +4,8 @@ extends Node
 ## the game stays playable muted.
 
 const SOUNDS := {
+	"wind_gain": preload("res://assets/sfx/wind_gain.wav"),
+	"sand_step": preload("res://assets/sfx/sand_step.wav"),
 	"hammer_clang": preload("res://assets/sfx/hammer_clang.wav"),
 	"husk_windup": preload("res://assets/sfx/husk_windup.wav"),
 	"whisper_present": preload("res://assets/sfx/whisper_present.wav"),

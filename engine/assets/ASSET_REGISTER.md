@@ -30,3 +30,14 @@ Every file under `assets/` is listed here with its source, licence and any modif
 | `polypizza/canoe.glb` | "Canoe" by Poly by Google, poly.pizza/m/0ciipfLS8Nf | CC-BY 3.0 | **Yes** | In credits. |
 
 Rule: any CC-BY asset must appear in `data/credits.txt`. Assets with NC (non-commercial), ND (no derivatives) or unclear authorship are not used. A goat model was removed because its author could not be confirmed. Before importing any outside asset (asset packs, commissioned art, AI-generated images, recorded sound or music), add a row with its source URL or creator, licence, credit wording and any changes made.
+
+## Original responsive-world work (28 October 2026)
+
+The surrounding terrain, worn-path and cloth shaders, wind-gate geometry and boost particles are project-authored procedural additions. Chicken motion uses the existing credited chicken asset and its Run/Idle_Peck clips. sand_step.wav and wind_gain.wav are original synthesized PCM effects created for this build; they are not recorded performances or third-party samples. Existing asset licenses and attributions remain in force.
+
+
+## First-person and civic revision (28 October 2026)
+
+Civic buildings, relays, utility carriers, paving and sleeves are original procedural geometry/shaders. First-person hands retain the existing credited Quaternius character skeleton, skin weights and animations; arm triangles are selected from that mesh at runtime. No new external character assets or recorded voices were added.
+
+The outlet stream mesh and flowing-water shader are original procedural additions. Directional damage and strike-confirmation marks are drawn in code.

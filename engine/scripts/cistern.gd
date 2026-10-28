@@ -86,11 +86,11 @@ func _refresh_props() -> void:
 
 func _objective() -> String:
 	if GameState.get_flag("sc03_complete"):
-		return "Get the release wheel from Reed Gate and find its keeper."
+		return "Go home."
 	if GameState.get_flag("water_policy") == "joint" and not GameState.get_flag("sc03_repair_done"):
 		if GameState.get_flag("sc03_pipe_taken"):
-			return "Fit the pipe at the old spring."
-		return "Carry the pipe to the old spring."
+			return "Fit the pipe."
+		return "Take the pipe."
 	if GameState.get_flag("sc03_arrived"):
-		return "Decide what happens to the water. Talk to Daru."
+		return "Decide the water."
 	return ""

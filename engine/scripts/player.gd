@@ -1,20 +1,21 @@
 class_name Player
 extends CharacterBody2D
-## Tavo in human form: top-down movement and choosing what to interact with.
-## Moves by keyboard or on-screen stick, or walks to a tapped/clicked point.
-## Tapping an object walks to it and uses it on arrival.
+## Tavo movement on the scene footprint, rendered through an eye-level 3D camera.
+## First-person controls move relative to view. Legacy path APIs support scripted tests.
 ## In combat scenes he can also strike with the repair hammer and dodge.
 
 signal focus_changed(target: Interactable)
 signal health_changed(current: int, maximum: int)
 signal defeated
+## World-space source, emitted only for an accepted hit.
+signal hit_received(source: Vector2)
 ## "miss", "deflect", "interrupt", "hit" or "break"; see Husk.take_hammer().
 ## Anything in the "hammer_target" group can be struck: it provides hit_radius,
 ## is_threat() and take_hammer() -> String.
 signal struck(result: String)
 signal dodged
 
-const SPEED := 150.0
+const SPEED := 190.0
 const SIZE := Vector2(20, 28)
 const ART := preload("res://assets/art/characters/tavo.svg")
 const ART_HEIGHT := 48.0
@@ -34,6 +35,9 @@ const HIT_GRACE_SECONDS := 0.9
 
 ## False while dialogue or a cutscene owns the controls.
 var active := true
+var first_person_controls := false
+var view_yaw := 0.0
+var aim_direction := Vector2.UP
 ## Set by the on-screen stick; added to keyboard input.
 var touch_vector := Vector2.ZERO
 var combat_enabled := false
@@ -72,8 +76,11 @@ func _physics_process(delta: float) -> void:
 	_cooldown_left = maxf(_cooldown_left - delta, 0.0)
 	_grace_left = maxf(_grace_left - delta, 0.0)
 	_swing_left = maxf(_swing_left - delta, 0.0)
-	if not active and _walking:
-		cancel_walk()
+	if not active:
+		if _walking:
+			cancel_walk()
+		_dash_left = 0.0
+		touch_vector = Vector2.ZERO
 	if _dash_left > 0.0:
 		_dash_left -= delta
 		velocity = _dash_direction * _dash_speed
@@ -110,6 +117,8 @@ func _physics_process(delta: float) -> void:
 		if not _attack_target.is_threat():
 			cancel_walk()
 		elif _distance_to_target(_attack_target) <= ATTACK_RANGE - 4.0:
+			if first_person_controls:
+				aim_direction = (_attack_target.global_position - global_position).normalized()
 			cancel_walk()
 			attack()
 
@@ -148,7 +157,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			and event.device != InputEvent.DEVICE_ID_EMULATION:
 		# Real mouse clicks only; touches arrive through TouchControls.
 		get_viewport().set_input_as_handled()
-		walk_to_screen(event.position)
+		if first_person_controls:
+			try_interact()
+		else:
+			walk_to_screen(event.position)
 
 
 ## Uses whatever is in reach; in combat with nothing in reach, swings the hammer.
@@ -212,6 +224,7 @@ func take_hit(from: Vector2) -> bool:
 	_dodging = false
 	_dash(global_position - from, DODGE_SPEED * 0.6, KNOCKBACK_SECONDS)
 	health_changed.emit(health, MAX_HEALTH)
+	hit_received.emit(from)
 	if health == 0:
 		defeated.emit()
 	return true
@@ -294,7 +307,8 @@ func exit_reach(target: Interactable) -> void:
 
 
 func _input_vector() -> Vector2:
-	return Input.get_vector("move_left", "move_right", "move_up", "move_down") + touch_vector
+	var vector := Input.get_vector("move_left", "move_right", "move_up", "move_down") + touch_vector
+	return vector.rotated(-view_yaw) if first_person_controls else vector
 
 
 func _dash(direction: Vector2, speed: float, seconds: float) -> void:
@@ -345,6 +359,8 @@ func _nearest_target(max_distance: float) -> Node2D:
 	var best_distance := INF
 	for node in get_tree().get_nodes_in_group("hammer_target"):
 		var target := node as Node2D
+		if first_person_controls and max_distance < INF and (target.global_position - global_position).normalized().dot(aim_direction) < 0.55:
+			continue
 		var distance: float = global_position.distance_to(target.global_position) - target.hit_radius
 		if target.is_threat() and distance <= max_distance and distance < best_distance:
 			best_distance = distance
@@ -369,6 +385,8 @@ func _update_focus() -> void:
 	if active:
 		var best_distance := INF
 		for target in _nearby:
+			if first_person_controls and (target.global_position - global_position).normalized().dot(aim_direction) < 0.55:
+				continue
 			var distance := global_position.distance_squared_to(target.global_position)
 			if target.enabled and distance < best_distance:
 				best_distance = distance

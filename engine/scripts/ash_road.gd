@@ -65,8 +65,8 @@ func _begin_first() -> void:
 	_fighting = true
 	set_combat(true)
 	_refresh_objective()
-	await _say("ambush")
 	husk_one.activate(player)
+	await _say("ambush")
 
 
 func _begin_second() -> void:

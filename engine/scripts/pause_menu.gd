@@ -33,6 +33,8 @@ func is_open() -> bool:
 
 func open() -> void:
 	_overlay.visible = true
+	if DisplayServer.get_name() != "headless":
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	get_tree().paused = true
 	_size_button.grab_focus.call_deferred()
 
@@ -40,6 +42,8 @@ func open() -> void:
 func close() -> void:
 	_overlay.visible = false
 	get_tree().paused = false
+	for rig in get_tree().get_nodes_in_group("first_person_rig"):
+		rig.capture_mouse_if_active()
 
 
 func _unhandled_input(event: InputEvent) -> void:

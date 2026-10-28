@@ -12,6 +12,7 @@ var pause_menu: PauseMenu
 ## Scenes with their own pointer handling (eagle flight) turn the touch layer off.
 var touch_enabled := true
 var _busy := false
+var _speech_serial := 0
 
 
 var world_view: WorldView
@@ -26,6 +27,7 @@ func _ready() -> void:
 	add_child(world_view)
 	player.screen_to_world = world_view.screen_to_world_2d
 	dialogue.load_file(_dialogue_file())
+	dialogue.line_started.connect(_on_dialogue_line)
 	for child in get_children():
 		if child is Interactable:
 			child.used.connect(use)
@@ -38,10 +40,11 @@ func _ready() -> void:
 	hud.show_key_hints = not touch.device_has_touch
 	hud.restart_requested.connect(_restart)
 	hud.title_requested.connect(get_tree().change_scene_to_file.bind(PauseMenu.TITLE_SCENE))
+	touch.first_person = true
+	touch.look_changed.connect(world_view.first_person.look_delta)
 	touch.vector_changed.connect(func(vector: Vector2) -> void: player.touch_vector = vector)
 	touch.interact_pressed.connect(player.try_interact)
 	touch.dodge_pressed.connect(player.dodge)
-	touch.tapped.connect(player.walk_to_screen)
 	pause_menu = PauseMenu.new()
 	add_child(pause_menu)
 	_refresh_objective()
@@ -66,6 +69,8 @@ func _dress_scene() -> void:
 func use(target: Interactable) -> void:
 	if _busy:
 		return
+	if String(target.name) in ["Basket", "Bag", "Bird", "Pipe", "Pump", "SluiceLock", "SideChannel", "Brace", "Bypass"]:
+		world_view.first_person.gesture(false)
 	await _on_used(target)
 	_refresh_objective()
 
@@ -92,11 +97,24 @@ func _refresh_objective() -> void:
 
 
 func _say(conversation_id: String) -> void:
-	_busy = true
-	player.active = false
-	touch.set_shown(false)
+	_speech_serial += 1
+	var serial := _speech_serial
+	dialogue.cancel()
+	var blocks := dialogue.blocks_controls(conversation_id)
+	_busy = blocks
+	hud.set_dialogue_active(true, blocks)
+	player.active = not blocks
+	if blocks:
+		player.cancel_walk()
+		player.touch_vector = Vector2.ZERO
+	touch.set_shown(touch_enabled and not blocks)
 	dialogue.play(conversation_id)
 	await dialogue.finished
+	if serial != _speech_serial:
+		return
+	world_view.end_shot()
+	hud.set_dialogue_active(false)
+	hud.show_prompt(player.focus_target())
 	player.active = true
 	touch.set_shown(touch_enabled)
 	_busy = false
@@ -209,3 +227,50 @@ func _restart() -> void:
 		return
 	GameState.new_game()
 	get_tree().change_scene_to_file(GameState.current_scene_path())
+
+
+func _on_dialogue_line(line: Dictionary) -> void:
+	if line.has("shot"):
+		world_view.frame_shot(line.shot)
+	elif not dialogue.blocks_controls_from_current():
+		world_view.end_shot()
+	world_view.animate_speaker(str(line.get("speaker", "")).capitalize())
+	match str(line.get("stage", "")):
+		"gift":
+			var sena := world_view.figure_for("Sena")
+			if sena != null:
+				sena.play("pick_up")
+			world_view.tavo.play("interact")
+		"unlock":
+			world_view.tavo.play("interact")
+			Sfx.play("door_open")
+		"wheel":
+			world_view.tavo.play("fix")
+		"collapse":
+			world_view.begin_collapse()
+			shake(4.0)
+
+
+## Sparse directional guidance replaces reliance on the old overhead layout.
+func guidance_target() -> Node2D:
+	var target := "Exit"
+	match String(name):
+		"WellYard":
+			target = "Exit" if GameState.get_flag("sc02_complete") else ("Pump" if GameState.get_flag("sc02_pin_collected") else "Basket")
+		"Cistern":
+			if not GameState.get_flag("sc03_complete"):
+				target = ("Spring" if GameState.get_flag("sc03_pipe_taken") else "Pipe") if GameState.get_flag("water_policy") == "joint" else "Daru"
+		"Home":
+			target = "Door" if GameState.get_flag("sc04_complete") else "Sena"
+		"AshRoad":
+			if GameState.get_flag("sc05_merchant_done") and not GameState.get_flag("sc05_complete"):
+				target = "Nali"
+		"Culvert":
+			target = "Exit" if GameState.get_flag("sc06_complete") else ("Hook" if GameState.get_flag("sc06_asked") else ("Figure" if GameState.get_flag("sc06_inspected") else "Reflection"))
+		"ReedGate":
+			target = "SluiceLock" if GameState.get_flag("sc07_braced") else ("Brace" if GameState.get_flag("sc07_drained") else "SideChannel")
+		"KeeperRoom":
+			target = "StairOne" if player.position.y >= 400 else ("StairTwo" if player.position.y >= 280 else ("StairThree" if player.position.y >= 160 else "BrokenWall"))
+		"WheelPlatform":
+			target = "Bypass"
+	return get_node_or_null(target) as Node2D

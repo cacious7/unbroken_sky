@@ -8,6 +8,12 @@ signal title_requested
 ## Keyboard hints are hidden on touch devices, which use the on-screen button.
 var show_key_hints := true
 
+var _dialogue_active := false
+var _cinematic := false
+
+var _flow_panel: PanelContainer
+var _flow_label: Label
+var _flow_enabled := false
 var _objective: Label
 var _objective_panel: PanelContainer
 var _prompt: Label
@@ -36,11 +42,11 @@ func _ready() -> void:
 
 func set_objective(text: String) -> void:
 	_objective.text = text
-	_objective_panel.visible = text != ""
+	_objective_panel.visible = text != "" and not _cinematic
 
 
 func show_prompt(target: Interactable) -> void:
-	_prompt.visible = target != null
+	_prompt.visible = target != null and not _dialogue_active
 	if target != null:
 		_prompt.text = ("[E]  " if show_key_hints else "") + target.prompt
 
@@ -140,6 +146,17 @@ func _build() -> void:
 	_objective_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_objective_panel.position = Vector2(16, 16)
 	root.add_child(_objective_panel)
+	_flow_panel = PanelContainer.new()
+	_flow_panel.add_theme_stylebox_override("panel", _panel_style())
+	_flow_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_flow_panel.position = Vector2(16, 68)
+	_flow_panel.visible = false
+	root.add_child(_flow_panel)
+	_objective_panel.resized.connect(_layout_wind_progress)
+	_flow_label = Label.new()
+	_flow_label.add_theme_color_override("font_color", Color("#87e6d3"))
+	_flow_panel.add_child(_flow_label)
+	_scaled.append([_flow_label, 18])
 	_objective = Label.new()
 	_objective_panel.add_child(_objective)
 	_scaled.append([_objective, 18])
@@ -251,3 +268,24 @@ func _build() -> void:
 		button.pressed.connect((entry[1] as Signal).emit)
 		buttons.add_child(button)
 		_scaled.append([button, 18])
+
+
+func set_dialogue_active(on: bool, cinematic := false) -> void:
+	_dialogue_active = on
+	_cinematic = cinematic and on
+	_flow_panel.visible = _flow_enabled and not _cinematic
+	_objective_panel.visible = _objective.text != "" and not _cinematic
+	if on:
+		_prompt.visible = false
+	if _cinematic:
+		_caption.modulate.a = 0.0
+
+
+func set_wind_progress(current: int, total: int, on := true) -> void:
+	_flow_enabled = on
+	_flow_label.text = "WIND  %d/%d" % [current, total]
+	_flow_panel.visible = on and not _cinematic
+
+
+func _layout_wind_progress() -> void:
+	_flow_panel.position = Vector2(16, _objective_panel.position.y + _objective_panel.size.y + 8)

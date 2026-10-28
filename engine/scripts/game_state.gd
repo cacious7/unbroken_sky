@@ -25,7 +25,7 @@ const TEST_ROOM_SAVE_PATH := "user://test_room_save.json"
 ## Story state from Game Concept/development/CHOICES_AND_STATE.md plus per-scene progress.
 ## "" means a policy has not been chosen yet.
 const DEFAULTS := {
-	"scene_id": "SC01",
+	"scene_id": "SC02",
 	"water_policy": "",
 	"water_compact": false,
 	"eagle_unlocked": false,
@@ -87,9 +87,12 @@ var save_path := STORY_SAVE_PATH
 ## Tests turn this off so scene transitions only update state.
 var scene_changes_enabled := true
 var flags: Dictionary = {}
+var _transition: CanvasLayer
 
 
 func _ready() -> void:
+	_transition = preload("res://scripts/scene_transition.gd").new()
+	add_child(_transition)
 	_setup_input()
 	reset()
 
@@ -136,6 +139,8 @@ func matches(conditions: Dictionary) -> bool:
 func start_test_room(scene_id: String) -> void:
 	save_path = TEST_ROOM_SAVE_PATH
 	new_game()
+	if scene_id == "SC08":
+		set_flag("sc08_talked", true)
 	go_to(scene_id)
 
 
@@ -148,9 +153,11 @@ func current_scene_path() -> String:
 
 
 func go_to(scene_id: String) -> void:
+	if scene_changes_enabled and _transition.changing:
+		return
 	set_flag("scene_id", scene_id)
 	if scene_changes_enabled:
-		get_tree().change_scene_to_file(SCENES[scene_id])
+		_transition.change_to(SCENES[scene_id])
 
 
 func has_save() -> bool:

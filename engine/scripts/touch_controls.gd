@@ -5,6 +5,7 @@ extends CanvasLayer
 ## action button at the bottom right uses whatever is in reach (or strikes in combat);
 ## in combat a dodge button sits beside it. Only shown on touch screens.
 
+signal look_changed(delta: Vector2)
 signal vector_changed(vector: Vector2)
 signal interact_pressed
 signal dodge_pressed
@@ -19,6 +20,8 @@ const TAP_SLOP := 14.0
 var device_has_touch := false
 ## Flight lets a drag anywhere become the stick, not just on the left half.
 var stick_anywhere := false
+var first_person := false
+var _look_index := -1
 
 var _canvas: Control
 ## Touches that may still become a tap, by index: start position.
@@ -50,6 +53,7 @@ func set_shown(on: bool) -> void:
 	if not visible:
 		_pending.clear()
 		_stick_index = -1
+		_look_index = -1
 		_set_vector(Vector2.ZERO)
 
 
@@ -95,9 +99,18 @@ func _input(event: InputEvent) -> void:
 			elif _combat and event.position.distance_to(_dodge_centre()) <= DODGE_RADIUS * 1.3:
 				_flash("dodge")
 				dodge_pressed.emit()
+			elif first_person:
+				if event.position.x >= _canvas.size.x * 0.5 and _look_index == -1:
+					_look_index = event.index
+				elif event.position.x < _canvas.size.x * 0.5 and _stick_index == -1:
+					_stick_index = event.index
+					_stick_origin = event.position
 			else:
 				_pending[event.index] = event.position
 		else:
+			if event.index == _look_index:
+				_look_index = -1
+				get_viewport().set_input_as_handled()
 			if _pending.has(event.index):
 				_pending.erase(event.index)
 				tapped.emit(event.position)
@@ -105,6 +118,10 @@ func _input(event: InputEvent) -> void:
 				_stick_index = -1
 				_set_vector(Vector2.ZERO)
 	elif event is InputEventScreenDrag:
+		if first_person and event.index == _look_index:
+			get_viewport().set_input_as_handled()
+			look_changed.emit(event.relative)
+			return
 		if _pending.has(event.index):
 			var start: Vector2 = _pending[event.index]
 			if event.position.distance_to(start) <= TAP_SLOP:

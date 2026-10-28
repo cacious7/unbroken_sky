@@ -77,6 +77,8 @@ static func copper() -> StandardMaterial3D:
 
 ## Which ground texture a flat surface gets, from its scene and name.
 static func for_surface(scene_name: String, surface_name: String, color: Color) -> Material:
+	if scene_name in ["WellYard", "Cistern", "Home", "ReedGate", "KeeperRoom", "WheelPlatform"] and surface_name in ["Ground", "Floor", "Platform"]:
+		return civic_paving()
 	if color.b > color.r:
 		return water()
 	match surface_name:
@@ -96,3 +98,58 @@ static func for_surface(scene_name: String, surface_name: String, color: Color) 
 		"AshRoad":
 			return get_material("red_earth", Color(1.0, 0.92, 0.85))
 	return get_material("red_earth")
+
+
+## Inherited manufactured materials, with wear rather than a loss of technology.
+static func civic(kind := "shell") -> StandardMaterial3D:
+	var key := "civic_" + kind
+	if _cache.has(key):
+		return _cache[key]
+	var material := StandardMaterial3D.new()
+	match kind:
+		"shell":
+			material = get_material("plaster", Color("#ded8c4")).duplicate() as StandardMaterial3D
+			material.albedo_texture = null
+			material.albedo_color = Color("#ded8c4")
+			material.normal_scale = 0.25
+			material.roughness = 0.62
+		"teal":
+			material.albedo_color = Color("#1d7376")
+			material.metallic = 0.45
+			material.roughness = 0.32
+		"metal":
+			material.albedo_color = Color("#304955")
+			material.metallic = 0.8
+			material.roughness = 0.38
+		"bronze":
+			material = copper().duplicate() as StandardMaterial3D
+			material.albedo_color = Color("#c28d54")
+		"glass":
+			material.albedo_color = Color("#123d4d")
+			material.metallic = 0.35
+			material.roughness = 0.13
+		"light":
+			material.albedo_color = Color("#8cddd1")
+			material.emission_enabled = true
+			material.emission = Color("#42aaad")
+			material.emission_energy_multiplier = 0.4
+		"leaf":
+			material.albedo_color = Color("#49765b")
+			material.roughness = 0.9
+		"patch":
+			material = get_material("plaster", Color("#b4aaa0")).duplicate() as StandardMaterial3D
+			material.normal_scale = 0.4
+			material.roughness = 0.85
+		_:
+			material.albedo_color = Color("#b8ad99")
+	_cache[key] = material
+	return material
+
+
+static func civic_paving() -> ShaderMaterial:
+	if _cache.has("civic_paving"):
+		return _cache.civic_paving
+	var material := ShaderMaterial.new()
+	material.shader = load("res://assets/shaders/civic_paving.gdshader")
+	_cache.civic_paving = material
+	return material

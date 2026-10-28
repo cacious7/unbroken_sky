@@ -12,6 +12,8 @@ const CAST_PATH := "res://data/cast.json"
 ## Gameplay name -> animation in the library.
 const ANIMATIONS := {
 	"idle": "Idle",
+	"torch": "Idle_Torch",
+	"hold_tool": "Pistol_Aim_Neutral",
 	"talk": "Idle_Talking",
 	"walk": "Walk",
 	"run": "Jog_Fwd",
@@ -59,7 +61,7 @@ func _ready() -> void:
 	add_child(_model)
 	skeleton = _model.find_children("", "Skeleton3D", true, false)[0]
 	animation_player = _model.find_children("", "AnimationPlayer", true, false)[0]
-	for loop_name: String in ["idle", "talk", "walk", "run", "fix"]:
+	for loop_name: String in ["idle", "talk", "walk", "run", "fix", "torch", "hold_tool"]:
 		var animation := animation_player.get_animation(ANIMATIONS[loop_name])
 		if animation != null:
 			animation.loop_mode = Animation.LOOP_LINEAR
@@ -68,6 +70,8 @@ func _ready() -> void:
 	_face_forward()
 	_dress(cast().get(character, cast()["tavo"]))
 	play(_looping)
+	_add_story_marks()
+	_merge_head_detail()
 
 
 ## Loops ("idle", "walk", "run", "talk", "fix") replace each other; one-shots
@@ -86,13 +90,13 @@ func play(action: String, speed := 1.0) -> void:
 		animation_player.speed_scale = speed
 
 
-func set_moving(moving: bool, speed_ratio := 1.0) -> void:
+func set_moving(moving: bool, speed_ratio := 1.0, running := false) -> void:
 	if animation_player != null and ANIMATIONS.values().has(animation_player.current_animation) \
 			and animation_player.current_animation in [ANIMATIONS.strike, ANIMATIONS.dodge, ANIMATIONS.hit]:
 		return
 	if moving:
-		play("walk", clampf(speed_ratio, 0.6, 1.6))
-	elif _looping == "walk":
+		play("run" if running else "walk", clampf(speed_ratio, 0.6, 1.6))
+	elif _looping in ["walk", "run"]:
 		play("idle")
 
 
@@ -207,7 +211,7 @@ func _dress(c: Dictionary) -> void:
 	var hips := _joint("DEF-hips")
 	var chest_top := _joint("DEF-neck")
 	var head := _joint("DEF-head")
-	var head_center := head + _up * 0.1
+	var head_center := head + _up * 0.14
 
 	# Trousers or bare legs, and shoes.
 	for side: String in ["L", "R"]:
@@ -237,11 +241,10 @@ func _dress(c: Dictionary) -> void:
 	for side: String in ["L", "R"]:
 		var shoulder := _joint("DEF-upper_arm." + side)
 		var elbow := _joint("DEF-forearm." + side)
-		_segment("DEF-upper_arm." + side, shoulder, shoulder.lerp(elbow, 0.7), 0.075, top)
+		_segment("DEF-upper_arm." + side, shoulder, shoulder.lerp(elbow, 0.7), 0.10, top)
 
 	# Face and hair (the mannequin's head is smooth).
-	for sign: float in [-1.0, 1.0]:
-		_ball("DEF-head", head_center + _forward * 0.105 + _side * 0.042 * sign + _up * 0.02, 0.019, Color("#120c08"))
+	_face_detail(c, head_center)
 	_hair(c.hair, hair, head_center)
 
 	# Items.
@@ -311,3 +314,139 @@ func _material(color: Color) -> StandardMaterial3D:
 		material.roughness = 0.8
 		_materials[key] = material
 	return _materials[key]
+
+
+## These clues remain attached to the wrist through all animations.
+func _add_story_marks() -> void:
+	if character != "tavo" and character != "mera":
+		return
+	var wrist := _joint("DEF-hand.L")
+	var elbow := _joint("DEF-forearm.L")
+	var at := wrist.lerp(elbow, 0.15)
+	if character == "tavo":
+		for i in 3:
+			_block("DEF-forearm.L", at + _up * (i - 1) * 0.025 + _forward * 0.045,
+					Vector3(0.04, 0.003, 0.002), Color("#3e2520"))
+	else:
+		for i in 3:
+			_ball("DEF-forearm.L", at + _side * (i - 1) * 0.013 + _forward * 0.046,
+					0.018, Color("#9b5235"), Vector3(0.7, 1.3 + i * 0.2, 0.07))
+
+
+func bone_position(bone: String) -> Vector3:
+	var index := skeleton.find_bone(bone)
+	if index == -1:
+		return global_position + Vector3.UP
+	return skeleton.global_transform * skeleton.get_bone_global_pose(index).origin
+
+
+## Small shaded forms give the existing rig a face at conversation distance.
+## All head decorations are merged below to keep one draw call on mobile.
+func _face_detail(c: Dictionary, center: Vector3) -> void:
+	var skin := Color(c.skin)
+	var brow := Color(c.hair_color).darkened(0.2)
+	var spacing := 0.043 if character in ["sena", "nali"] else 0.047
+	for sign: float in [-1.0, 1.0]:
+		var eye := center + _forward * 0.108 + _side * spacing * sign + _up * 0.012
+		_ball("DEF-head", eye, 0.021, skin.darkened(0.2), Vector3(1.4, 0.65, 0.48))
+		_ball("DEF-head", eye + _forward * 0.007, 0.015, Color("#d4c5a6"), Vector3(1.25, 0.65, 0.3))
+		_ball("DEF-head", eye + _forward * 0.012, 0.009, Color("#20160d"), Vector3(0.8, 1.0, 0.45))
+		_block("DEF-head", eye + _up * 0.029, Vector3(0.045, 0.009, 0.012), brow, sign * 0.08)
+		_ball("DEF-head", center + _side * 0.113 * sign - _up * 0.015, 0.027, skin, Vector3(0.4, 1.2, 0.8))
+		_ball("DEF-head", center + _side * 0.065 * sign - _up * 0.031 + _forward * 0.085,
+				0.029, skin.lightened(0.025), Vector3(1.2, 0.65, 0.65))
+	_ball("DEF-head", center + _forward * 0.124 - _up * 0.012, 0.025, skin, Vector3(0.85, 1.2, 0.8))
+	_ball("DEF-head", center + _forward * 0.109 - _up * 0.061, 0.028, skin.darkened(0.28), Vector3(1.15, 0.22, 0.35))
+	_ball("DEF-head", center + _forward * 0.112 - _up * 0.069, 0.025, skin.lightened(0.07), Vector3(1.1, 0.2, 0.3))
+	if character in ["mera", "orun", "eren"]:
+		for sign: float in [-1.0, 1.0]:
+			_block("DEF-head", center + _side * 0.072 * sign + _forward * 0.095 - _up * 0.003,
+					Vector3(0.025, 0.004, 0.006), skin.darkened(0.25), sign * 0.25)
+
+
+func _merge_head_detail() -> void:
+	var holder := _attach("DEF-head")
+	var surface := SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for child in holder.get_children():
+		var part := child as MeshInstance3D
+		if part == null:
+			continue
+		var arrays := part.mesh.surface_get_arrays(0)
+		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+		var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+		var tint := (part.material_override as StandardMaterial3D).albedo_color
+		for index in indices:
+			surface.set_color(tint)
+			surface.set_normal((part.transform.basis.inverse().transposed() * normals[index]).normalized())
+			surface.add_vertex(part.transform * vertices[index])
+		holder.remove_child(part)
+		part.queue_free()
+	var combined := MeshInstance3D.new()
+	combined.name = "FaceAndHair"
+	combined.mesh = surface.commit()
+	var material := StandardMaterial3D.new()
+	material.vertex_color_use_as_albedo = true
+	material.vertex_color_is_srgb = true
+	material.roughness = 0.85
+	combined.material_override = material
+	holder.add_child(combined)
+
+
+## Reuse the actual skinned hands/fingers and tool grip for the first-person view.
+## Filtering indices preserves the original skeleton, weights and animations.
+func show_arms_only() -> void:
+	var allowed := {}
+	for i in skeleton.get_bone_count():
+		var ancestor := i
+		while ancestor >= 0:
+			if skeleton.get_bone_name(ancestor) in ["DEF-forearm.L", "DEF-forearm.R"]:
+				allowed[i] = true
+				break
+			ancestor = skeleton.get_bone_parent(ancestor)
+	for holder: BoneAttachment3D in skeleton.find_children("", "BoneAttachment3D", true, false):
+		if not allowed.has(skeleton.find_bone(holder.bone_name)):
+			holder.get_parent().remove_child(holder)
+			holder.queue_free()
+	for part: MeshInstance3D in _model.find_children("", "MeshInstance3D", true, false):
+		var original := part.mesh
+		if original.get_surface_count() == 0:
+			continue
+		var first := original.surface_get_arrays(0)
+		if first[Mesh.ARRAY_BONES] == null:
+			continue
+		var replacement := ArrayMesh.new()
+		var materials: Array[Material] = []
+		for surface in original.get_surface_count():
+			var arrays := original.surface_get_arrays(surface)
+			var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
+			var weights: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
+			var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			if bones.is_empty():
+				continue
+			var stride: int = bones.size() / vertices.size()
+			var keep := PackedByteArray()
+			keep.resize(vertices.size())
+			for vertex in vertices.size():
+				var amount := 0.0
+				for weight in stride:
+					if allowed.has(bones[vertex * stride + weight]):
+						amount += weights[vertex * stride + weight]
+				keep[vertex] = 1 if amount > 0.4 else 0
+			var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+			var filtered := PackedInt32Array()
+			for triangle in range(0, indices.size(), 3):
+				if keep[indices[triangle]] and keep[indices[triangle + 1]] and keep[indices[triangle + 2]]:
+					filtered.append(indices[triangle])
+					filtered.append(indices[triangle + 1])
+					filtered.append(indices[triangle + 2])
+			if filtered.is_empty():
+				continue
+			arrays[Mesh.ARRAY_INDEX] = filtered
+			var flags: int = Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS if stride == 8 else 0
+			replacement.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, flags)
+			materials.append(part.get_active_material(surface))
+		part.mesh = replacement
+		for index in materials.size():
+			part.set_surface_override_material(index, materials[index])
