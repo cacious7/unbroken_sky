@@ -13,6 +13,7 @@ const RESULT_CAPTIONS := {
 @onready var figure: Interactable = $Figure
 @onready var rope: WaterRope = $WaterRope
 @onready var hook: Interactable = $Hook
+@onready var reflection: Interactable = $Reflection
 
 
 func _dialogue_file() -> String:
@@ -39,6 +40,7 @@ func _on_used(target: Interactable) -> void:
 		"Reflection":
 			await _say("reflection")
 			GameState.set_flag("sc06_inspected", true)
+			_refresh_props()
 		"Figure":
 			if not GameState.get_flag("sc06_inspected"):
 				await _say("figure_plead")
@@ -100,6 +102,8 @@ func _refresh_props() -> void:
 	var asked: bool = GameState.get_flag("sc06_asked")
 	var broken: bool = GameState.get_flag("sc06_hook_broken")
 	figure.set_active(not asked)
+	# Once read, the water at her feet stops taking focus from her.
+	reflection.enabled = not GameState.get_flag("sc06_inspected")
 	hook.set_active(broken)
 	rope.visible = asked and not broken
 

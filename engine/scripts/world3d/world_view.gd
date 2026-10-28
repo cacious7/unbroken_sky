@@ -41,6 +41,8 @@ var _speaking: CastFigure
 var _carried_pipe: MeshInstance3D
 var _life: Node3D
 var first_person: Node3D
+## SC06 only: the counterfeit mother's reflection and collapse.
+var mimic: Node3D
 var _collapsing := false
 var _collapse_time := 0.0
 
@@ -82,6 +84,10 @@ func _ready() -> void:
 	first_person = preload("res://scripts/world3d/first_person_rig.gd").new()
 	first_person.configure(self, camera)
 	add_child(first_person)
+	if scene.name == "Culvert":
+		mimic = preload("res://scripts/world3d/culvert_mimic.gd").new()
+		mimic.configure(self)
+		add_child(mimic)
 	_update_camera(0.0, true)
 
 
@@ -124,7 +130,8 @@ func _process(delta: float) -> void:
 	for mirror: Array in _mirrors:
 		var source: CanvasItem = mirror[0]
 		var model := mirror[1] as Node3D
-		model.visible = source.visible
+		if not model.has_meta("staged"):
+			model.visible = source.visible
 		if source is Interactable:
 			if model is Label3D:
 				model.position = to_3d(source.global_position, 2.3)
@@ -290,6 +297,7 @@ func _build_rope(rope: WaterRope) -> void:
 	(_rope_column.mesh as CylinderMesh).top_radius = 0.18
 	(_rope_column.mesh as CylinderMesh).bottom_radius = 0.32
 	(_rope_column.mesh as CylinderMesh).height = 1.8
+	_rope_column.material_override = Materials3D.silt_water()
 	_rope.add_child(_rope_column)
 	var hook := _simple(TorusMesh.new(), Color("#c97a36"), Vector3(0, 0.45, -0.3))
 	(hook.mesh as TorusMesh).inner_radius = 0.08

@@ -142,7 +142,7 @@ static func build(object_name: String, size: Vector2) -> Node3D:
 			_skin(_box(root, Vector3(size.x, 1.8, size.y), Color("#7d776e"), Vector3(0, 0.9, 0)), "stone")
 			_box(root, Vector3(size.x * 0.55, 1.3, 0.1), Color("#151c22"), Vector3(0, 0.65, size.y / 2.0 + 0.01))
 		"Reflection":
-			var puddle := _cyl(root, size.x * 0.5, size.x * 0.5, 0.02, Color("#2c4a63"), Vector3(0, 0.02, 0))
+			var puddle := _cyl(root, size.x * 0.5, size.x * 0.5, 0.02, Color("#2c4a63"), Vector3(0, 0.02, 0), 40)
 			puddle.scale.z = size.y / size.x * 1.4
 		"Hook":
 			var hook := _torus(root, 0.08, 0.12, Color("#c97a36"), Vector3(0, 0.3, 0))

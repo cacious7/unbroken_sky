@@ -63,6 +63,22 @@ static func water() -> StandardMaterial3D:
 	return material
 
 
+## Moving water thick with silt: SC06's water rope and its spray.
+static func silt_water() -> StandardMaterial3D:
+	if _cache.has("silt_water"):
+		return _cache["silt_water"]
+	var material := StandardMaterial3D.new()
+	material.albedo_color = Color(0.36, 0.45, 0.47, 0.82)
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.roughness = 0.12
+	material.metallic = 0.1
+	material.rim_enabled = true
+	material.rim = 0.6
+	material.rim_tint = 0.3
+	_cache["silt_water"] = material
+	return material
+
+
 ## Polished, slightly aged copper for the covenant's machinery.
 static func copper() -> StandardMaterial3D:
 	if _cache.has("copper"):

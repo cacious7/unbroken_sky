@@ -67,7 +67,7 @@ label = "MERA?"
 prompt = "Go to her"
 
 [node name="Reflection" type="Area2D" parent="."]
-position = Vector2(560, 310)
+position = Vector2(512, 256)
 script = ExtResource("3_inter")
 body_size = Vector2(70, 26)
 color = Color(0.3, 0.45, 0.55, 1)

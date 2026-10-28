@@ -23,12 +23,15 @@
       {
         "id": "sc06_reflection_01",
         "speaker": "NALI",
+        "caption": "[reflection speaks out of time]",
         "text": "Watch the water. That is not what she said.",
         "delivery": "cinematic",
         "shot": {
           "target": "Reflection",
           "height": 0.15,
-          "distance": 2
+          "side": -1.6,
+          "rise": 0.9,
+          "distance": 0.3
         },
         "duration": 2.5
       }

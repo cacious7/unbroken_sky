@@ -704,13 +704,42 @@ func _test_sc06() -> void:
 	_start_at("SC06")
 	var culvert := await _spawn(CULVERT)
 	var rope: WaterRope = culvert.get_node("WaterRope")
+	var view := culvert.world_view
+	var mimic: Node3D = view.mimic
+	var twin: CastFigure = mimic.twin
+	var twin_meshes := twin.find_children("", "GeometryInstance3D", true, false)
+	_check(view.camera.cull_mask & mimic.REFLECTION_LAYER == 0
+			and twin_meshes.all(func(m: GeometryInstance3D) -> bool: return m.layers == mimic.REFLECTION_LAYER),
+			"SC06: the reflected twin exists only in the puddle, never in the main view")
+	_check(culvert.get_node("Reflection").global_position.x < culvert.get_node("Figure").global_position.x,
+			"SC06: the water lies at her feet on Tavo's side")
+	var real: CastFigure = view.figure_for("Figure")
+	real.play("idle")
+	mimic._process(0.0)
+	var silent_twin_talks: bool = mimic.twin_talking()
+	real.play("talk")
+	mimic._process(0.0)
+	_check(silent_twin_talks and not mimic.twin_talking(),
+			"SC06: the reflection mouths words while she is silent and stills when she speaks")
+	var to_tavo: Vector3 = view.tavo.global_position - twin.global_position
+	to_tavo.y = 0.0
+	_check((-twin.global_basis.z).dot(to_tavo.normalized()) > 0.95, "SC06: the reflection keeps its face on Tavo")
+	real.play("idle")
 	await _use(culvert, "Figure")
 	_check(not GameState.get_flag("sc06_asked") and not rope.is_threat(),
 			"SC06: approaching the figure reveals danger without starting a fight")
 	await _use(culvert, "Reflection")
+	_check(not culvert.get_node("Reflection").enabled, "SC06: once read, the water stops taking focus from her")
 	await _use(culvert, "Figure")
 	_check(GameState.get_flag("sc06_asked") and rope.is_threat() and not culvert.get_node("Figure").visible,
 			"SC06: after the reflection, the question collapses her into the water rope")
+	await _physics_frames(2)
+	var figure_3d: Node3D = view.get_node("Figure3D")
+	_check(mimic.collapsed and figure_3d.visible and not twin.visible,
+			"SC06: she slumps visibly rather than vanishing, and the reflection goes")
+	await _physics_frames(80)
+	_check(not figure_3d.visible and view._rope_column.scale.is_equal_approx(Vector3.ONE),
+			"SC06: the collapse ends with the water rope fully risen")
 	_check(rope.take_hammer() == "deflect", "SC06: the hook cannot be broken while it is marking a sweep")
 
 	# Standing inside the ring through a whole sweep costs health; outside it does not.
