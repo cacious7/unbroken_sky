@@ -1,0 +1,51 @@
+{
+  "scene_id": "SC07",
+  "source": "Game Concept/narrative/FINAL_SCRIPT.md, SC07 and its encounter notes. Lines marked \"system\": true are gameplay feedback, hints or placeholder prompts that are not in the script; review them before release.",
+  "conversations": {
+    "arrive": [
+      {"id": "sc07_arrive_01", "speaker": "", "text": "The fortress. Empty carts are trapped against the gate. A royal order is still nailed above the entrance."},
+      {"id": "sc07_arrive_02", "speaker": "VEYA", "caption": "[from the wall]", "text": "Move away from the spillway."},
+      {"id": "sc07_arrive_03", "speaker": "TAVO", "text": "We need the release wheel."},
+      {"id": "sc07_arrive_04", "speaker": "VEYA", "text": "So does everyone downstream. That's why it stays here."},
+      {"id": "sc07_arrive_05", "speaker": "NALI", "text": "Open the clinic door. I have medicine."},
+      {"id": "sc07_arrive_06", "speaker": "", "text": "Veya recognises Nali and lowers a ladder. She is repairing machinery, not sitting on a throne."},
+      {"id": "sc07_arrive_07", "speaker": "VEYA", "text": "The wheel holds a cracked gate shut. Take it now and the upper reservoir drains into the lower wards."},
+      {"id": "sc07_arrive_08", "speaker": "TAVO", "text": "My home is running dry."},
+      {"id": "sc07_arrive_09", "speaker": "VEYA", "text": "Then help me make it safe to remove."}
+    ],
+    "drain": [
+      {"id": "sc07_drain_01", "speaker": "", "system": true, "text": "Tavo opens the side channel. The water behind the cracked gate drops."}
+    ],
+    "drain_done": [
+      {"id": "sc07_drain_done_01", "speaker": "", "system": true, "text": "The side channel is running. The level is holding low."}
+    ],
+    "brace_early": [
+      {"id": "sc07_brace_early_01", "speaker": "", "system": true, "text": "The brace won't shift while the channel is full. Drain it first."}
+    ],
+    "brace": [
+      {"id": "sc07_brace_01", "speaker": "", "system": true, "text": "Tavo shifts the brace under the cracked gate. It takes the load."}
+    ],
+    "brace_done": [
+      {"id": "sc07_brace_done_01", "speaker": "", "system": true, "text": "The brace is holding."}
+    ],
+    "key_early": [
+      {"id": "sc07_key_early_01", "speaker": "", "system": true, "text": "The mechanism is still under load. Brace the gate first."}
+    ],
+    "key": [
+      {"id": "sc07_key_01", "speaker": "", "text": "Sena's key fits. The sluice lock turns."},
+      {"id": "sc07_key_02", "speaker": "", "text": "Behind the sluice grille, a sleeping man whispers in Tavo's own voice."},
+      {"id": "sc07_key_03", "sfx": "whisper_present", "speaker": "SLEEPING MAN", "caption": "[a whisper in Tavo's voice]", "text": "Present."},
+      {"id": "sc07_key_04", "speaker": "", "text": "Tavo freezes."},
+      {"id": "sc07_key_05", "speaker": "NALI", "text": "He's alive. Don't pull him out until I see the chain."}
+    ],
+    "inspect_order": [
+      {"id": "sc07_order_01", "speaker": "", "text": "ADMIT CERTIFIED HOUSEHOLDS ONLY."}
+    ],
+    "veya": [
+      {"id": "sc07_veya_01", "speaker": "VEYA", "system": true, "text": "Drain, brace, key. In that order, or the crack runs."}
+    ],
+    "nali": [
+      {"id": "sc07_nali_01", "speaker": "NALI", "system": true, "text": "The clinic is through there. Make it safe and I'll go in."}
+    ]
+  }
+}

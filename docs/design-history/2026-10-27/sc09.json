@@ -1,0 +1,26 @@
+{
+  "scene_id": "SC09",
+  "source": "Game Concept/narrative/FINAL_SCRIPT.md, SC09 and its encounter notes. Lines marked \"system\": true are gameplay feedback, hints or placeholder prompts that are not in the script; review them before release.",
+  "conversations": {
+    "fall": [
+      {"id": "sc09_fall_01", "speaker": "", "text": "Tavo falls through a broken wall. Sena's bird tumbles beside him. His fingers close around it; feathers follow the arm. His body becomes an eagle."}
+    ],
+    "hint": [
+      {"id": "sc09_hint_01", "speaker": "", "system": true, "text": "Fly to the bright perch before your wings tire. Hold a finger, or the mouse, where you want to go; arrow keys steer too. Flight assist in the pause menu widens the landings."}
+    ],
+    "voice": [
+      {"id": "sc09_voice_01", "speaker": "VOICE", "caption": "[an unfamiliar voice]", "text": "Left. The air comes up there."},
+      {"id": "sc09_voice_02", "speaker": "TAVO", "text": "Who said that?"},
+      {"id": "sc09_voice_03", "speaker": "VOICE", "text": "You asked me that before."}
+    ],
+    "land": [
+      {"id": "sc09_land_01", "speaker": "", "text": "He lands human. Nali has seen everything."},
+      {"id": "sc09_land_02", "speaker": "TAVO", "text": "Tell me that happens to couriers."},
+      {"id": "sc09_land_03", "speaker": "NALI", "text": "Not the ones I've paid."},
+      {"id": "sc09_land_04", "speaker": "", "text": "Kesi steps out of the stair shadow, now human."},
+      {"id": "sc09_land_05", "speaker": "KESI", "text": "You could have landed badly enough to keep the wings."},
+      {"id": "sc09_land_06", "speaker": "TAVO", "text": "Who are you?"},
+      {"id": "sc09_land_07", "speaker": "KESI", "text": "Someone who learned badly."}
+    ]
+  }
+}

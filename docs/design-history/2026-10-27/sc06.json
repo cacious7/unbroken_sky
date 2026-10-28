@@ -1,0 +1,45 @@
+{
+  "scene_id": "SC06",
+  "source": "Game Concept/narrative/FINAL_SCRIPT.md, SC06 and its encounter notes. Lines marked \"system\": true are gameplay feedback, hints or placeholder prompts that are not in the script; review them before release.",
+  "conversations": {
+    "arrive": [
+      {"id": "sc06_arrive_01", "speaker": "", "text": "At a dry culvert, a woman calls to Tavo in Mera's voice. She wears Mera's scarf, but her clothes are wet."},
+      {"id": "sc06_arrive_02", "speaker": "FIGURE", "caption": "[voice from the culvert]", "text": "Come help your mother."}
+    ],
+    "figure_plead": [
+      {"id": "sc06_figure_plead_01", "speaker": "FIGURE", "text": "Come help your mother."},
+      {"id": "sc06_figure_plead_02", "speaker": "", "system": true, "text": "Water pools at her feet in a dry culvert. Something in it moves out of time."}
+    ],
+    "reflection": [
+      {"id": "sc06_reflection_01", "speaker": "", "caption": "[reflection speaks out of time]", "text": "In the water at her feet, the figure's reflection mouths different words."}
+    ],
+    "question": [
+      {"id": "sc06_question_01", "speaker": "FIGURE", "text": "Say you know me. Just say it."},
+      {"id": "sc06_question_02", "speaker": "NALI", "text": "Ask her something she would refuse to give you."},
+      {"id": "sc06_question_03", "speaker": "TAVO", "text": "Tell me what happened when I was seven."},
+      {"id": "sc06_question_04", "speaker": "", "text": "The figure repeats the question with precisely his intonation. It cannot answer. Its outline collapses into a rope of water and silt."},
+      {"id": "sc06_question_05", "speaker": "", "system": true, "text": "When the ring appears, get clear of it. When the copper hook is exposed, strike it."}
+    ],
+    "after": [
+      {"id": "sc06_after_01", "speaker": "TAVO", "text": "You knew."},
+      {"id": "sc06_after_02", "speaker": "NALI", "text": "I knew it was wrong. I didn't know what it would do."},
+      {"id": "sc06_after_03", "speaker": "TAVO", "text": "What was it?"},
+      {"id": "sc06_after_04", "speaker": "NALI", "text": "Something asking you to let it be her."}
+    ],
+    "inspect_hook": [
+      {"id": "sc06_hook_01", "speaker": "TAVO", "text": "An official mark. Someone built a place for this thing to attach."}
+    ],
+    "defeat": [
+      {"id": "sc06_defeat_01", "speaker": "", "system": true, "text": "The water throws Tavo back up the bank. He gets his footing and tries again."}
+    ],
+    "nali_before": [
+      {"id": "sc06_nali_before_01", "speaker": "NALI", "system": true, "text": "Look before you go to her."}
+    ],
+    "nali_after": [
+      {"id": "sc06_nali_after_01", "speaker": "NALI", "system": true, "text": "Reed Gate. Before anything else learns your voice."}
+    ],
+    "exit_locked": [
+      {"id": "sc06_exit_locked_01", "speaker": "", "system": true, "text": "Not with that thing at the crossing."}
+    ]
+  }
+}

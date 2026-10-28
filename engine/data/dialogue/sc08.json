@@ -1,27 +1,79 @@
 {
   "scene_id": "SC08",
-  "source": "Game Concept/narrative/FINAL_SCRIPT.md, SC08 and its encounter notes. Lines marked \"system\": true are gameplay feedback, hints or placeholder prompts that are not in the script; review them before release.",
+  "source": "Gameplay adaptation, 27 October 2026; see docs/GAMEPLAY_DIRECTION.md. Narrative baseline: Game Concept/narrative/FINAL_SCRIPT.md.",
   "conversations": {
     "keeper": [
-      {"id": "sc08_keeper_01", "speaker": "", "text": "Eren is the fortress keeper. He lies behind a copper grille, attached by the wrist to a failing ritual circuit. A hyena watches from a broken stair. It withdraws when noticed."},
-      {"id": "sc08_keeper_02", "speaker": "EREN", "text": "Seven came back."},
-      {"id": "sc08_keeper_03", "speaker": "TAVO", "text": "My name is Tavo."},
-      {"id": "sc08_keeper_04", "speaker": "EREN", "text": "Of course it is. Of course she gave you one."},
-      {"id": "sc08_keeper_05", "speaker": "", "caption": "[memory]", "text": "A child-height view of the grille from inside. Then the same grille from outside. Same crack, different angles."},
-      {"id": "sc08_keeper_06", "speaker": "EREN", "text": "Your mother took the registers. I kept the transfer slips. Archive courtyard. Under the blue drain tile."},
-      {"id": "sc08_keeper_07", "speaker": "TAVO", "text": "Why do you know my mother?"},
-      {"id": "sc08_keeper_08", "speaker": "EREN", "text": "I want to say I only counted them."},
-      {"id": "sc08_keeper_09", "speaker": "NALI", "text": "Counted whom?"},
-      {"id": "sc08_keeper_10", "speaker": "EREN", "text": "I put the numbers where their names had been."},
-      {"id": "sc08_keeper_11", "speaker": "", "text": "He tries to disconnect himself. A copper channel lights."},
-      {"id": "sc08_keeper_12", "speaker": "EREN", "text": "Don't let them make you the answer again."}
+      {
+        "id": "sc08_keeper_02",
+        "speaker": "EREN",
+        "text": "Seven came back.",
+        "delivery": "cinematic",
+        "shot": {
+          "target": "Grille",
+          "height": 1.1,
+          "distance": 3
+        }
+      },
+      {
+        "id": "sc08_keeper_03",
+        "speaker": "TAVO",
+        "text": "My name is Tavo."
+      },
+      {
+        "id": "sc08_keeper_04",
+        "speaker": "EREN",
+        "text": "Of course it is. Of course she gave you one."
+      },
+      {
+        "id": "sc08_keeper_06",
+        "speaker": "EREN",
+        "text": "Transfer slips. Archive courtyard, under the blue drain tile. Your mother took the registers."
+      },
+      {
+        "id": "sc08_keeper_07",
+        "speaker": "TAVO",
+        "text": "Why do you know my mother?"
+      },
+      {
+        "id": "sc08_keeper_08",
+        "speaker": "EREN",
+        "text": "I told myself I was only counting."
+      },
+      {
+        "id": "sc08_keeper_09",
+        "speaker": "NALI",
+        "text": "Counted whom?"
+      },
+      {
+        "id": "sc08_keeper_10",
+        "speaker": "EREN",
+        "text": "I put the numbers where their names had been."
+      },
+      {
+        "id": "sc08_keeper_12",
+        "speaker": "EREN",
+        "text": "Don't let them make you the answer again."
+      }
     ],
     "flood": [
-      {"id": "sc08_flood_01", "speaker": "", "text": "The room floods with dark water. Nali hauls at Eren's chain, but the current is too strong."},
-      {"id": "sc08_flood_02", "speaker": "", "system": true, "text": "Climb the marked stair before the water reaches you."}
+      {
+        "id": "sc08_flood_02",
+        "speaker": "NALI",
+        "text": "Tavo! Up the stairs!",
+        "duration": 1.1,
+        "delivery": "ambient"
+      }
     ],
     "collapse": [
-      {"id": "sc08_collapse_01", "speaker": "", "text": "A section of the stair collapses beneath him."}
+      {
+        "id": "sc08_collapse_01",
+        "speaker": "",
+        "text": "",
+        "delivery": "cinematic",
+        "stage": "collapse",
+        "duration": 0.65,
+        "sfx": "metal_scrape"
+      }
     ]
   }
 }

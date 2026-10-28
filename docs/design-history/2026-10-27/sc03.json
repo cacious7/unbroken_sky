@@ -1,0 +1,72 @@
+{
+  "scene_id": "SC03",
+  "source": "Game Concept/narrative/FINAL_SCRIPT.md, SC03 and CHOICES_AND_STATE.md. Lines marked \"system\": true are gameplay feedback, hints or placeholder prompts that are not in the script; review them before release.",
+  "conversations": {
+    "arrive": [
+      {"id": "sc03_arrive_01", "speaker": "", "text": "Daru has stopped distribution from the well. Twelve covered jars remain. Refugees wait beyond the gate. A local elder has written household allocations on a slate."},
+      {"id": "sc03_arrive_02", "speaker": "DARU", "text": "Clean reserves. Enough until the next caravan if we keep the gate closed."},
+      {"id": "sc03_arrive_03", "speaker": "NALI", "caption": "[from beyond the gate]", "text": "Two of ours cannot swallow. I need water before I need permission."},
+      {"id": "sc03_arrive_04", "speaker": "DARU", "text": "And tomorrow?"},
+      {"id": "sc03_arrive_05", "speaker": "NALI", "text": "Tomorrow I ask again."},
+      {"id": "sc03_arrive_06", "speaker": "", "text": "Tavo recognises Nali's river court accent. Daru hands him the slate."},
+      {"id": "sc03_arrive_07", "speaker": "DARU", "text": "You've carried messages to Reed Gate. You know which promises come back."}
+    ],
+    "choice": [
+      {"id": "sc03_choice_01", "speaker": "", "text": "Twelve jars. Daru and Nali are waiting for Tavo's answer.",
+        "choices": [
+          {"id": "c1_reserve", "text": "KEEP THE RESERVES", "preview": "Red Hollow keeps all twelve jars. The refugees stay outside the gate for now.", "effects": {"water_policy": "reserve"}},
+          {"id": "c1_share", "text": "SHARE NOW", "preview": "Six jars go to Nali's people now. Six remain for Red Hollow.", "effects": {"water_policy": "share"}},
+          {"id": "c1_joint", "text": "PROPOSE A JOINT REPAIR", "preview": "Two jars go to the sick first. Then workers from both sides open the old spring together. Ten jars remain.", "effects": {"water_policy": "joint"}}
+        ]
+      },
+      {"id": "sc03_choice_reserve_01", "if": {"water_policy": "reserve"}, "speaker": "TAVO", "text": "We keep the twelve jars. I will look for another source."},
+      {"id": "sc03_choice_reserve_02", "if": {"water_policy": "reserve"}, "speaker": "NALI", "text": "I'll remember the answer. I still need that channel open."},
+      {"id": "sc03_choice_share_01", "if": {"water_policy": "share"}, "speaker": "TAVO", "text": "Six jars for them. Six for us. We both find water."},
+      {"id": "sc03_choice_share_02", "if": {"water_policy": "share"}, "speaker": "NALI", "text": "Thank you. Who keeps the count tomorrow?"},
+      {"id": "sc03_choice_joint_01", "if": {"water_policy": "joint"}, "speaker": "TAVO", "text": "Two jars for treatment now. Your pump workers and ours open the old spring together."},
+      {"id": "sc03_choice_joint_02", "if": {"water_policy": "joint"}, "speaker": "", "text": "Nali agrees to send workers. Daru agrees only if both sides count the water. The two treatment jars go through the gate first."},
+      {"id": "sc03_choice_joint_03", "if": {"water_policy": "joint"}, "speaker": "NALI", "text": "One keeper from each side. Neither touches the measuring stick alone."}
+    ],
+    "pipe_take": [
+      {"id": "sc03_pipe_take_01", "speaker": "", "text": "Tavo takes the middle of the pipe. A Red Hollow pump worker lifts one end; one of Nali's people lifts the other."}
+    ],
+    "spring_needs_pipe": [
+      {"id": "sc03_spring_needs_pipe_01", "speaker": "", "system": true, "text": "The old spring's channel is open, but the water has nowhere to go. It needs the pipe."}
+    ],
+    "spring_repair": [
+      {"id": "sc03_spring_repair_01", "speaker": "", "text": "The pipe seats into the old channel. Water gathers in a marked settling bowl."},
+      {"id": "sc03_spring_repair_02", "speaker": "", "text": "Nali leaves an attendant to maintain it."}
+    ],
+    "conclude": [
+      {"id": "sc03_conclude_01", "speaker": "DARU", "text": "The old line runs through Reed Gate. If its wheel still turns, we can refill here."},
+      {"id": "sc03_conclude_02", "speaker": "", "text": "Mera examines a seal brought by the refugees."},
+      {"id": "sc03_conclude_03", "speaker": "MERA", "text": "The fortress keeper is alive. Eren. He signed this."},
+      {"id": "sc03_conclude_04", "speaker": "TAVO", "text": "You know his hand?"},
+      {"id": "sc03_conclude_05", "speaker": "MERA", "text": "I know his office."}
+    ],
+    "daru_after": [
+      {"id": "sc03_daru_after_01", "speaker": "DARU", "system": true, "text": "The count is on the slate. Now we see whether it holds."}
+    ],
+    "nali": [
+      {"id": "sc03_nali_01", "if": {"water_policy": ""}, "speaker": "NALI", "system": true, "text": "I'm not asking you to decide for Daru. I'm asking you to decide."},
+      {"id": "sc03_nali_02", "if": {"water_policy": "reserve"}, "speaker": "NALI", "system": true, "text": "Find your other source quickly."},
+      {"id": "sc03_nali_03", "if": {"water_policy": "share"}, "speaker": "NALI", "system": true, "text": "Six jars. I'll make them last."},
+      {"id": "sc03_nali_04", "if": {"water_policy": "joint"}, "speaker": "NALI", "system": true, "text": "My workers are ready when yours are."}
+    ],
+    "inspect_jars": [
+      {"id": "sc03_jars_01", "if": {"water_policy": ""}, "speaker": "", "system": true, "text": "Twelve covered jars. Clean water, counted twice."},
+      {"id": "sc03_jars_02", "if": {"water_policy": "reserve"}, "speaker": "", "system": true, "text": "Twelve jars, still covered."},
+      {"id": "sc03_jars_03", "if": {"water_policy": "share"}, "speaker": "", "system": true, "text": "Six jars left. Six went through the gate."},
+      {"id": "sc03_jars_04", "if": {"water_policy": "joint"}, "speaker": "", "system": true, "text": "Ten jars. Two went to Nali's sick first."}
+    ],
+    "mera_waiting": [
+      {"id": "sc03_mera_waiting_01", "speaker": "MERA", "system": true, "text": "Settle the water first. I'm reading."}
+    ],
+    "mera_after": [
+      {"id": "sc03_mera_after_01", "speaker": "MERA", "system": true, "text": "Come home. I'll pack your bag."}
+    ],
+    "exit_locked": [
+      {"id": "sc03_exit_locked_01", "speaker": "", "system": true, "text": "Not while the water is still undecided."}
+    ]
+  }
+}

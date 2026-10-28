@@ -1,69 +1,225 @@
 {
   "scene_id": "SC02",
-  "source": "Game Concept/narrative/FINAL_SCRIPT.md, SC02. Lines marked \"system\": true are gameplay feedback, hints or placeholder prompts that are not in the script; review them before release.",
+  "source": "Gameplay adaptation, 27 October 2026; see docs/GAMEPLAY_DIRECTION.md. Narrative baseline: Game Concept/narrative/FINAL_SCRIPT.md.",
   "conversations": {
     "intro": [
-      {"id": "sc02_intro_01", "speaker": "", "text": "Morning heat in Red Hollow. Sena balances a little copper bird over the brazier. Tavo works the well pump. The handle sticks."},
-      {"id": "sc02_intro_02", "speaker": "SENA", "text": "Touch it again and I'll charge you."},
-      {"id": "sc02_intro_03", "speaker": "TAVO", "text": "For the bird?"},
-      {"id": "sc02_intro_04", "speaker": "SENA", "text": "For breaking it while explaining how to improve it."},
-      {"id": "sc02_intro_05", "speaker": "TAVO", "text": "The wings are too heavy."},
-      {"id": "sc02_intro_06", "speaker": "SENA", "text": "Then make a lighter world."}
+      {
+        "id": "sc02_intro_02",
+        "speaker": "SENA",
+        "text": "Pin! In the caddy. Hurry.",
+        "delivery": "ambient",
+        "duration": 1.7
+      }
     ],
     "pump_stuck": [
-      {"id": "sc02_pump_stuck_01", "speaker": "", "system": true, "text": "The handle won't move. Its lever pin has worked loose. The tool basket should have a spare."}
+      {
+        "id": "sc02_pump_stuck_01",
+        "speaker": "",
+        "system": true,
+        "text": "The pin is missing.",
+        "delivery": "ambient"
+      }
     ],
     "basket_take": [
-      {"id": "sc02_basket_take_01", "speaker": "", "system": true, "text": "Tavo takes a lever pin from the basket."}
+      {
+        "id": "sc02_basket_take_01",
+        "speaker": "",
+        "system": true,
+        "text": "Tavo takes a lever pin from the basket.",
+        "delivery": "ambient"
+      }
     ],
     "basket_empty": [
-      {"id": "sc02_basket_empty_01", "speaker": "", "system": true, "text": "Nothing else in the basket he needs."}
+      {
+        "id": "sc02_basket_empty_01",
+        "speaker": "",
+        "system": true,
+        "text": "Empty.",
+        "delivery": "ambient"
+      }
     ],
     "pump_fix": [
-      {"id": "sc02_pump_fix_01", "speaker": "", "system": true, "text": "The pin slides into place. The handle moves freely."}
+      {
+        "id": "sc02_pump_fix_01",
+        "speaker": "",
+        "system": true,
+        "text": "The pin slides into place. The handle moves freely.",
+        "delivery": "ambient"
+      }
     ],
     "pump_clear": [
-      {"id": "sc02_pump_clear_01", "speaker": "", "system": true, "text": "The first pull brings up clear water."}
+      {
+        "id": "sc02_pump_clear_01",
+        "speaker": "",
+        "system": true,
+        "text": "The first pull brings up clear water.",
+        "delivery": "ambient"
+      }
     ],
     "pump_silt": [
-      {"id": "sc02_pump_silt_01", "speaker": "", "system": true, "text": "The second pull brings up black silt."}
+      {
+        "id": "sc02_pump_silt_01",
+        "speaker": "",
+        "system": true,
+        "text": "The second pull brings up black silt.",
+        "delivery": "ambient"
+      }
     ],
     "whisper": [
-      {"id": "sc02_whisper_01", "sfx": "whisper_present", "speaker": "WHISPER", "caption": "[a whisper rises from the well]", "text": "Present."},
-      {"id": "sc02_whisper_02", "speaker": "TAVO", "text": "Did you hear that?"},
-      {"id": "sc02_whisper_03", "speaker": "SENA", "text": "I heard our breakfast becoming a long walk."}
+      {
+        "id": "sc02_whisper_01",
+        "speaker": "WHISPER",
+        "text": "Present.",
+        "delivery": "cinematic",
+        "sfx": "whisper_present",
+        "shot": {
+          "target": "Pump",
+          "height": 0.4,
+          "side": 0.4,
+          "distance": 1.5
+        },
+        "duration": 1
+      },
+      {
+        "id": "sc02_whisper_02",
+        "speaker": "TAVO",
+        "text": "Sena. You heard that?",
+        "duration": 1.4
+      },
+      {
+        "id": "sc02_whisper_03",
+        "speaker": "SENA",
+        "text": "...Yeah.",
+        "duration": 0.8
+      }
     ],
     "mera": [
-      {"id": "sc02_mera_01", "speaker": "", "text": "Mera catches Tavo's wrist before he touches the silt. Beneath her sleeve is an old copper burn. On his own wrist, three fine cuts briefly darken. She hides the burn before he can ask."},
-      {"id": "sc02_mera_02", "speaker": "MERA", "text": "Wash your hand. Not in this water."},
-      {"id": "sc02_mera_03", "speaker": "TAVO", "text": "What is it?"},
-      {"id": "sc02_mera_04", "speaker": "MERA", "text": "Something from below."},
-      {"id": "sc02_mera_05", "speaker": "SENA", "text": "Helpful. We were worried it came from the sky."},
-      {"id": "sc02_mera_06", "speaker": "", "text": "Mera does not smile. A runner calls them to the cistern."}
+      {
+        "id": "sc02_mera_01",
+        "speaker": "",
+        "text": "",
+        "delivery": "cinematic",
+        "stage": "wrist",
+        "duration": 1.1,
+        "shot": {
+          "target": "Player",
+          "bone": "DEF-hand.L",
+          "side": 0.25,
+          "rise": 0.12,
+          "distance": 0.65,
+          "fov": 35
+        }
+      },
+      {
+        "id": "sc02_mera_02",
+        "speaker": "MERA",
+        "text": "Hands out. Now.",
+        "shot": {
+          "target": "Mera",
+          "height": 1.4,
+          "side": 0.7,
+          "distance": 2.1
+        },
+        "duration": 1.2
+      },
+      {
+        "id": "sc02_mera_burn",
+        "speaker": "",
+        "text": "",
+        "stage": "burn",
+        "duration": 1,
+        "shot": {
+          "target": "Mera",
+          "bone": "DEF-hand.L",
+          "side": 0.2,
+          "rise": 0.12,
+          "distance": 0.65,
+          "fov": 35
+        }
+      },
+      {
+        "id": "sc02_mera_03",
+        "speaker": "TAVO",
+        "text": "Your wrist... What is that?",
+        "duration": 1.6
+      },
+      {
+        "id": "sc02_mera_04",
+        "speaker": "MERA",
+        "text": "Get Daru. Nobody drinks from this well.",
+        "shot": {
+          "target": "Mera",
+          "height": 1.4,
+          "distance": 2.2
+        },
+        "duration": 2
+      }
     ],
     "pump_after": [
-      {"id": "sc02_pump_after_01", "speaker": "", "system": true, "text": "The spout still drips black. Not in this water."}
+      {
+        "id": "sc02_pump_after_01",
+        "speaker": "",
+        "system": true,
+        "text": "Black water.",
+        "delivery": "ambient"
+      }
     ],
     "inspect_well": [
-      {"id": "sc02_inspect_well_01", "speaker": "TAVO", "text": "My mother taught me never to cover a bad repair with fresh plaster."}
+      {
+        "id": "sc02_inspect_well_01",
+        "speaker": "TAVO",
+        "text": "My mother taught me never to cover a bad repair with fresh plaster.",
+        "delivery": "manual"
+      }
     ],
     "inspect_bird": [
-      {"id": "sc02_inspect_bird_01", "speaker": "TAVO", "text": "Sena keeps improving the same bird. She says making another would let the first one win."}
+      {
+        "id": "sc02_inspect_bird_01",
+        "speaker": "TAVO",
+        "text": "Sena keeps improving the same bird. She says making another would let the first one win.",
+        "delivery": "manual"
+      }
     ],
     "sena_before_pin": [
-      {"id": "sc02_sena_before_pin_01", "speaker": "SENA", "system": true, "text": "The spare pin is in the basket. Where it always is."}
+      {
+        "id": "sc02_sena_before_pin_01",
+        "speaker": "SENA",
+        "text": "Caddy. Go!",
+        "delivery": "ambient"
+      }
     ],
     "sena_before_pump": [
-      {"id": "sc02_sena_before_pump_01", "speaker": "SENA", "system": true, "text": "Pin in, then pump. Try not to improve anything."}
+      {
+        "id": "sc02_sena_before_pump_01",
+        "speaker": "SENA",
+        "text": "I have it. Get that pin in.",
+        "delivery": "ambient"
+      }
     ],
     "sena_after": [
-      {"id": "sc02_sena_after_01", "speaker": "SENA", "system": true, "text": "Go on. Daru will be counting jars without us."}
+      {
+        "id": "sc02_sena_after_01",
+        "speaker": "SENA",
+        "text": "I'll keep people away. Find Daru.",
+        "delivery": "ambient"
+      }
     ],
     "mera_after": [
-      {"id": "sc02_mera_after_01", "speaker": "MERA", "system": true, "text": "The cistern, Tavo. Wash your hand first."}
+      {
+        "id": "sc02_mera_after_01",
+        "speaker": "MERA",
+        "text": "The cistern. Go.",
+        "delivery": "ambient"
+      }
     ],
     "exit_locked": [
-      {"id": "sc02_exit_locked_01", "speaker": "", "system": true, "text": "Not yet. The pump comes first."}
+      {
+        "id": "sc02_exit_locked_01",
+        "speaker": "",
+        "system": true,
+        "text": "Not yet. The pump comes first.",
+        "delivery": "ambient"
+      }
     ]
   }
 }

@@ -29,3 +29,11 @@ When altering a reveal, check its earlier clues and later dialogue. When changin
 ## Completion update on 27 October
 
 The full prose narrative is now complete in FULL_STORY.md, distinct from the game adaptation. It follows the shared-containment ending and preserves the synopsis approved in conversation. The game script now includes complete encounter delivery and failure/checkpoint notes. The full implementation milestone plan is IMPLEMENTATION_PLAN.md; the first-session checklist remains FIRST_BUILD_PLAN.md. Tomorrow now means 28 October 2026. No engine implementation or publication is included in this writing task. Original choices are preserved separately from later repairs, and survivor-safety and gate-control state changes are explicit in the game script.
+
+## Gameplay delivery revision, 27 October
+
+The owner requested a faster mobile game with immediate activity, natural short conversations, minimal required reading, visual clues, purposeful closeups and voiced animation where production allows. The current gameplay adaptation starts new games in the well-yard emergency, uses ambient remarks over play, and reserves focused scenes for important reveals. Earlier delivery drafts are archived in docs/design-history/2026-10-27. The governing implementation and remaining production work are recorded in docs/GAMEPLAY_DIRECTION.md. The prose story and underlying choice/state outcomes remain the narrative baseline. Current characters and the transformation are prototype staging; final character art, recorded performances and lip sync are not yet delivered.
+
+## Authoritative visual and camera direction, 28 October 2026
+
+The owner clarified that this is a futuristic game about a once prosperous kingdom that fell. Less wealthy districts remain developed; decline appears through damaged and patched infrastructure, unequal access and disorder. Earlier rural/precolonial scene dressing is superseded. Gameplay must be first person, with interactions seen from the player's own view, comparable in camera/control language to Call of Duty Mobile. The earlier overhead/Diablo-like framing is superseded. See docs/FUTURISTIC_FIRST_PERSON_DIRECTION.md for the current implementation and production limits. These changes preserve the story's people, responsibility and choice outcomes.

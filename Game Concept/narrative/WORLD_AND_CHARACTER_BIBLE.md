@@ -1,6 +1,6 @@
 # The Unbroken Sky story bible
 
-Version 1.1 • Canon companion to FINAL_SCRIPT.md
+Version 1.2 ? Current setting: futuristic fallen kingdom. Companion to FINAL_SCRIPT.md
 
 ## Decisions now settled
 
@@ -14,9 +14,9 @@ When the disaster that destroyed a prosperous river capital reaches his dry home
 
 ## Setting
 
-This is an invented precolonial inspired world with no asserted Gregorian date, historical map or real ancient kingdom called Zambia. Maamba and the southern Zambian landscape are starting points for later visual and environmental research, not claims that Maamba was a historical desert kingdom. The landscape includes dry woodland, rocky escarpments, cultivated ground and seasonal water; avoid depicting the whole region as sand desert.
+The game is a futuristic African-inspired fantasy about an advanced kingdom after its fall, with no asserted Gregorian date, historical map or real kingdom called Zambia. The owner's 28 October 2026 direction supersedes the earlier precolonial visual baseline. Maamba and the southern Zambian landscape are starting points for later visual and environmental research, not claims that Maamba was a historical desert kingdom. The landscape includes dry woodland, rocky escarpments, cultivated ground and seasonal water; avoid depicting the whole region as sand desert.
 
-Red Hollow belongs to a small upland kingdom. Its people use separate wells, know difficult routes and trade metalwork with river neighbours. Their initial relative safety is geographic and infrastructural. Heat tolerance is acquired experience and practical knowledge, not ethnic superhuman biology. They are neither culturally uniform nor morally purer than the capital.
+Red Hollow belongs to a smaller upland kingdom. It inherits developed housing, fabrication and service infrastructure, including an older independent water network with manual emergency pumps. Its less wealthy districts are crowded, unevenly maintained and improvised, rather than technologically undeveloped. Its people know difficult routes and trade engineering and metalwork with river neighbours. Their initial relative safety is geographic and infrastructural. Heat tolerance is acquired experience and practical knowledge, not ethnic superhuman biology. They are neither culturally uniform nor morally purer than the capital.
 
 The river alliance includes multiple polities. Only one ruined capital is visited. Its farming, engineering, medicine, scholarship and craft are genuine human achievements. Magical extraction subsidised some services and luxury consumption; it did not create African civilisation. This distinction is essential to the premise.
 
